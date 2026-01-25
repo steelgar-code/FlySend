@@ -5,11 +5,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
+import Home from "@/pages/Home";
+import CreateTemplate from "@/pages/CreateTemplate";
+import EditTemplate from "@/pages/EditTemplate";
+import SendTemplate from "@/pages/SendTemplate";
+
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
+      <Route path="/" component={Home} />
+      <Route path="/create" component={CreateTemplate} />
+      <Route path="/edit/:id" component={EditTemplate} />
+      <Route path="/send/:id" component={SendTemplate} />
+      
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
