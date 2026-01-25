@@ -1,36 +1,77 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl, type InsertTemplate, type Template } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
 
+export interface LocalTemplate {
+  id: number;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+
+export type InsertTemplate = Omit<LocalTemplate, "id" | "createdAt">;
+
+const STORAGE_KEY = "whatsapp-templates";
+
+function getTemplatesFromStorage(): LocalTemplate[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      const defaults: LocalTemplate[] = [
+        {
+          id: 1,
+          title: "Order Ready",
+          content: "Hi {{name}}, your order #{{orderId}} is ready for pickup!",
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          title: "Meeting Reminder",
+          content: "Hello {{name}}, reminder for our meeting at {{time}} today. See you there!",
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: 3,
+          title: "Late Running",
+          content: "Hey {{name}}, I'm running about {{minutes}} minutes late. Sorry!",
+          createdAt: new Date().toISOString(),
+        },
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+      return defaults;
+    }
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+function saveTemplatesToStorage(templates: LocalTemplate[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
+}
+
+function getNextId(templates: LocalTemplate[]): number {
+  if (templates.length === 0) return 1;
+  return Math.max(...templates.map((t) => t.id)) + 1;
+}
+
 export function useTemplates() {
-  const { toast } = useToast();
-  
   return useQuery({
-    queryKey: [api.templates.list.path],
+    queryKey: ["templates"],
     queryFn: async () => {
-      const res = await fetch(api.templates.list.path, { credentials: "include" });
-      if (!res.ok) {
-        toast({
-          variant: "destructive",
-          title: "Error fetching templates",
-          description: "Could not load your templates. Please try again."
-        });
-        throw new Error("Failed to fetch templates");
-      }
-      return api.templates.list.responses[200].parse(await res.json());
+      return getTemplatesFromStorage().sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     },
+    staleTime: 0,
   });
 }
 
 export function useTemplate(id: number) {
   return useQuery({
-    queryKey: [api.templates.get.path, id],
+    queryKey: ["templates", id],
     queryFn: async () => {
-      const url = buildUrl(api.templates.get.path, { id });
-      const res = await fetch(url, { credentials: "include" });
-      if (res.status === 404) return null;
-      if (!res.ok) throw new Error("Failed to fetch template");
-      return api.templates.get.responses[200].parse(await res.json());
+      const templates = getTemplatesFromStorage();
+      return templates.find((t) => t.id === id) || null;
     },
     enabled: !!id,
   });
@@ -42,25 +83,19 @@ export function useCreateTemplate() {
 
   return useMutation({
     mutationFn: async (data: InsertTemplate) => {
-      const validated = api.templates.create.input.parse(data);
-      const res = await fetch(api.templates.create.path, {
-        method: api.templates.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validated),
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        if (res.status === 400) {
-          const error = api.templates.create.responses[400].parse(await res.json());
-          throw new Error(error.message);
-        }
-        throw new Error("Failed to create template");
-      }
-      return api.templates.create.responses[201].parse(await res.json());
+      const templates = getTemplatesFromStorage();
+      const newTemplate: LocalTemplate = {
+        id: getNextId(templates),
+        title: data.title,
+        content: data.content,
+        createdAt: new Date().toISOString(),
+      };
+      templates.push(newTemplate);
+      saveTemplatesToStorage(templates);
+      return newTemplate;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.templates.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
       toast({
         title: "Template created",
         description: "Your new message template is ready to use.",
@@ -82,28 +117,16 @@ export function useUpdateTemplate() {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: number } & Partial<InsertTemplate>) => {
-      const validated = api.templates.update.input.parse(updates);
-      const url = buildUrl(api.templates.update.path, { id });
-      
-      const res = await fetch(url, {
-        method: api.templates.update.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validated),
-        credentials: "include",
-      });
+      const templates = getTemplatesFromStorage();
+      const index = templates.findIndex((t) => t.id === id);
+      if (index === -1) throw new Error("Template not found");
 
-      if (!res.ok) {
-        if (res.status === 400) {
-          const error = api.templates.update.responses[400].parse(await res.json());
-          throw new Error(error.message);
-        }
-        if (res.status === 404) throw new Error("Template not found");
-        throw new Error("Failed to update template");
-      }
-      return api.templates.update.responses[200].parse(await res.json());
+      templates[index] = { ...templates[index], ...updates };
+      saveTemplatesToStorage(templates);
+      return templates[index];
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.templates.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
       toast({
         title: "Template updated",
         description: "Changes have been saved successfully.",
@@ -125,17 +148,13 @@ export function useDeleteTemplate() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const url = buildUrl(api.templates.delete.path, { id });
-      const res = await fetch(url, { 
-        method: api.templates.delete.method, 
-        credentials: "include" 
-      });
-      
-      if (res.status === 404) throw new Error("Template not found");
-      if (!res.ok) throw new Error("Failed to delete template");
+      const templates = getTemplatesFromStorage();
+      const filtered = templates.filter((t) => t.id !== id);
+      if (filtered.length === templates.length) throw new Error("Template not found");
+      saveTemplatesToStorage(filtered);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.templates.list.path] });
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
       toast({
         title: "Template deleted",
         description: "The template has been removed.",

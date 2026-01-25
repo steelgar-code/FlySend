@@ -1,7 +1,12 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTemplateSchema, type InsertTemplate } from "@shared/schema";
-import { useCreateTemplate } from "@/hooks/use-templates";
+import { z } from "zod";
+import { useCreateTemplate, type InsertTemplate } from "@/hooks/use-templates";
+
+const insertTemplateSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(1, "Content is required"),
+});
 import { useLocation } from "wouter";
 import { ArrowLeft, Save, HelpCircle } from "lucide-react";
 import { Link } from "wouter";
