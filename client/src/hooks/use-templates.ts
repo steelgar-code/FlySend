@@ -5,10 +5,13 @@ export interface LocalTemplate {
   id: number;
   title: string;
   content: string;
+  info: string;
+  time: string;
+  order: number;
   createdAt: string;
 }
 
-export type InsertTemplate = Omit<LocalTemplate, "id" | "createdAt">;
+export type InsertTemplate = Pick<LocalTemplate, "title" | "content" | "info" | "time">;
 
 const STORAGE_KEY = "whatsapp-templates";
 
@@ -21,25 +24,47 @@ function getTemplatesFromStorage(): LocalTemplate[] {
           id: 1,
           title: "Order Ready",
           content: "Hi {{name}}, your order #{{orderId}} is ready for pickup!",
+          info: "",
+          time: "",
+          order: 0,
           createdAt: new Date().toISOString(),
         },
         {
           id: 2,
           title: "Meeting Reminder",
           content: "Hello {{name}}, reminder for our meeting at {{time}} today. See you there!",
+          info: "",
+          time: "",
+          order: 1,
           createdAt: new Date().toISOString(),
         },
         {
           id: 3,
           title: "Late Running",
           content: "Hey {{name}}, I'm running about {{minutes}} minutes late. Sorry!",
+          info: "",
+          time: "",
+          order: 2,
           createdAt: new Date().toISOString(),
         },
       ];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
       return defaults;
     }
-    return JSON.parse(stored);
+
+    const parsed = JSON.parse(stored) as Partial<LocalTemplate>[];
+    const normalized = parsed.map((template, index) => ({
+      ...template,
+      info: typeof template.info === "string" ? template.info : "",
+      time: typeof template.time === "string" ? template.time : "",
+      order: typeof template.order === "number" ? template.order : index,
+    })) as LocalTemplate[];
+
+    // Persist the new optional fields/order for templates saved by older versions.
+    if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+      saveTemplatesToStorage(normalized);
+    }
+    return normalized;
   } catch {
     return [];
   }
@@ -58,9 +83,7 @@ export function useTemplates() {
   return useQuery({
     queryKey: ["templates"],
     queryFn: async () => {
-      return getTemplatesFromStorage().sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      return getTemplatesFromStorage().sort((a, b) => a.order - b.order);
     },
     staleTime: 0,
   });
@@ -88,6 +111,11 @@ export function useCreateTemplate() {
         id: getNextId(templates),
         title: data.title,
         content: data.content,
+        info: data.info,
+        time: data.time,
+        order: templates.length === 0
+          ? 0
+          : Math.max(...templates.map((template) => template.order)) + 1,
         createdAt: new Date().toISOString(),
       };
       templates.push(newTemplate);
@@ -136,6 +164,47 @@ export function useUpdateTemplate() {
       toast({
         variant: "destructive",
         title: "Error",
+        description: err.message,
+      });
+    },
+  });
+}
+
+export function useReorderTemplates() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({
+      sourceId,
+      targetId,
+      position = "before",
+    }: {
+      sourceId: number;
+      targetId: number;
+      position?: "before" | "after";
+    }) => {
+      const templates = getTemplatesFromStorage();
+      const orderedTemplates = [...templates].sort((a, b) => a.order - b.order);
+      const sourceIndex = orderedTemplates.findIndex((template) => template.id === sourceId);
+      const targetIndex = orderedTemplates.findIndex((template) => template.id === targetId);
+      if (sourceIndex === -1 || targetIndex === -1) throw new Error("Template not found");
+
+      const [source] = orderedTemplates.splice(sourceIndex, 1);
+      const nextTargetIndex = orderedTemplates.findIndex((template) => template.id === targetId);
+      orderedTemplates.splice(position === "after" ? nextTargetIndex + 1 : nextTargetIndex, 0, source);
+      orderedTemplates.forEach((template, index) => {
+        template.order = index;
+      });
+      saveTemplatesToStorage(orderedTemplates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+    },
+    onError: (err) => {
+      toast({
+        variant: "destructive",
+        title: "Could not reorder templates",
         description: err.message,
       });
     },

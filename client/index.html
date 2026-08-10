@@ -21,14 +21,17 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Remove older app-shell service workers so development and production
+      // always load the current client bundle. Template data remains in
+      // localStorage and is not affected by this cleanup.
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((reg) => {
-              console.log('SW registered:', reg.scope);
-              reg.update();
-            })
-            .catch((err) => console.log('SW registration failed:', err));
+        window.addEventListener('load', async () => {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((registration) => registration.unregister()));
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+          }
         });
       }
     </script>

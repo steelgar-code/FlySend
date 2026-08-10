@@ -7,6 +7,8 @@ import { useUpdateTemplate, useTemplate, type InsertTemplate } from "@/hooks/use
 const insertTemplateSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
+  info: z.string(),
+  time: z.string(),
 });
 import { useLocation, useRoute } from "wouter";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
@@ -37,6 +39,8 @@ export default function EditTemplate() {
     defaultValues: {
       title: "",
       content: "",
+      info: "",
+      time: "",
     },
   });
 
@@ -46,6 +50,8 @@ export default function EditTemplate() {
       form.reset({
         title: template.title,
         content: template.content,
+        info: template.info,
+        time: template.time,
       });
     }
   }, [template, form]);
@@ -126,6 +132,46 @@ export default function EditTemplate() {
                 </FormItem>
               )}
             />
+
+            <div className="grid gap-8 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="info"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Info</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., For returning customers"
+                        className="input-field"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Optional detail shown with the template.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Time</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., Weekdays at 9:00"
+                        className="input-field"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Optional time information for regular messages.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border/50 sm:relative sm:border-0 sm:bg-transparent sm:p-0">
               <div className="max-w-2xl mx-auto">

@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { useTemplates } from "@/hooks/use-templates";
+import { useReorderTemplates, useTemplates } from "@/hooks/use-templates";
 import { TemplateCard } from "@/components/TemplateCard";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,12 +7,37 @@ import { useState } from "react";
 
 export default function Home() {
   const { data: templates, isLoading, isError } = useTemplates();
+  const reorderMutation = useReorderTemplates();
   const [search, setSearch] = useState("");
+  const [draggedId, setDraggedId] = useState<number | null>(null);
 
   const filteredTemplates = templates?.filter(t => 
     t.title.toLowerCase().includes(search.toLowerCase()) || 
-    t.content.toLowerCase().includes(search.toLowerCase())
+    t.content.toLowerCase().includes(search.toLowerCase()) ||
+    t.info.toLowerCase().includes(search.toLowerCase()) ||
+    t.time.toLowerCase().includes(search.toLowerCase())
   );
+  const orderedTemplates = templates ?? [];
+
+  const moveTemplate = (templateId: number, direction: "up" | "down") => {
+    if (!templates) return;
+    const index = templates.findIndex((template) => template.id === templateId);
+    const target = templates[index + (direction === "up" ? -1 : 1)];
+    if (target) {
+      reorderMutation.mutate({
+        sourceId: templateId,
+        targetId: target.id,
+        position: direction === "up" ? "before" : "after",
+      });
+    }
+  };
+
+  const dropTemplate = (targetId: number) => {
+    if (draggedId !== null && draggedId !== targetId) {
+      reorderMutation.mutate({ sourceId: draggedId, targetId });
+    }
+    setDraggedId(null);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20 sm:pb-8">
@@ -78,7 +103,17 @@ export default function Home() {
           <AnimatePresence>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTemplates?.map((template) => (
-                <TemplateCard key={template.id} template={template} />
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  canMoveUp={orderedTemplates.findIndex((item) => item.id === template.id) > 0}
+                  canMoveDown={orderedTemplates.findIndex((item) => item.id === template.id) < orderedTemplates.length - 1}
+                  onMove={(direction) => moveTemplate(template.id, direction)}
+                  onDragStart={() => setDraggedId(template.id)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => dropTemplate(template.id)}
+                  isDragging={draggedId === template.id}
+                />
               ))}
             </div>
           </AnimatePresence>

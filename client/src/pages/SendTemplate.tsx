@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useRoute, Link } from "wouter";
 import { useTemplate } from "@/hooks/use-templates";
 import { VariableInput } from "@/components/VariableInput";
-import { ArrowLeft, Send, Copy, Check, Loader2, MessageCircle } from "lucide-react";
+import { ArrowLeft, Send, Copy, Check, Loader2, MessageCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -81,6 +81,18 @@ export default function SendTemplate() {
             </Link>
             <div className="overflow-hidden">
               <h1 className="text-xl font-bold font-display truncate">{template.title}</h1>
+              {(template.info || template.time) && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
+                  {template.info && <span className="truncate">{template.info}</span>}
+                  {template.info && template.time && <span aria-hidden="true">·</span>}
+                  {template.time && (
+                    <span className="flex items-center gap-1 truncate">
+                      <Clock className="w-3 h-3 shrink-0" />
+                      {template.time}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
