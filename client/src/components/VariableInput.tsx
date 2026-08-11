@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
+import { Clock3 } from "lucide-react";
 
 interface VariableInputProps {
   name: string;
@@ -9,6 +10,15 @@ interface VariableInputProps {
 }
 
 export function VariableInput({ name, value, onChange, index }: VariableInputProps) {
+  const isTimeVariable = name === "time";
+
+  const setCurrentTime = () => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    onChange(`${hours}:${minutes}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -19,14 +29,27 @@ export function VariableInput({ name, value, onChange, index }: VariableInputPro
       <Label htmlFor={`var-${name}`} className="text-sm font-medium text-foreground capitalize">
         {name.replace(/_/g, ' ')}
       </Label>
-      <input
-        id={`var-${name}`}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={`Enter ${name}...`}
-        className="input-field"
-        autoFocus={index === 0}
-      />
+      <div className="flex items-center gap-2">
+        <input
+          id={`var-${name}`}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={`Enter ${name}...`}
+          className="input-field"
+          autoFocus={index === 0}
+        />
+        {isTimeVariable && (
+          <button
+            type="button"
+            onClick={setCurrentTime}
+            aria-label="Use current time"
+            title="Use current time"
+            className="shrink-0 p-3 rounded-xl border-2 border-border text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+          >
+            <Clock3 className="w-5 h-5" />
+          </button>
+        )}
+      </div>
     </motion.div>
   );
 }
