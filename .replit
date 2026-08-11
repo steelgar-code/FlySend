@@ -18,6 +18,11 @@ run = ["node", "./dist/index.cjs"]
 build = ["npm", "run", "build"]
 publicDir = "dist/public"
 
+[[deployment.responseHeaders]]
+path = "/*"
+name = "Cache-Control"
+value = "no-cache"
+
 [workflows]
 runButton = "Project"
 

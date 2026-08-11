@@ -1,0 +1,1 @@
+- [PWA deployment updates](pwa-deployment-updates.md) — Installed static PWAs need republishing plus app-shell cache revalidation to receive new bundles.
