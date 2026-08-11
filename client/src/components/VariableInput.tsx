@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
-import { Clock3 } from "lucide-react";
+import { CalendarDays, Clock3 } from "lucide-react";
 
 interface VariableInputProps {
   name: string;
@@ -11,12 +11,21 @@ interface VariableInputProps {
 
 export function VariableInput({ name, value, onChange, index }: VariableInputProps) {
   const isTimeVariable = name === "time";
+  const isDateVariable = name === "date";
 
   const setCurrentTime = () => {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     onChange(`${hours}:${minutes}`);
+  };
+
+  const setCurrentDate = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = String(now.getFullYear()).slice(-2).padStart(2, "0");
+    onChange(`${day}.${month}.${year}`);
   };
 
   return (
@@ -38,15 +47,19 @@ export function VariableInput({ name, value, onChange, index }: VariableInputPro
           className="input-field"
           autoFocus={index === 0}
         />
-        {isTimeVariable && (
+        {(isTimeVariable || isDateVariable) && (
           <button
             type="button"
-            onClick={setCurrentTime}
-            aria-label="Use current time"
-            title="Use current time"
+            onClick={isTimeVariable ? setCurrentTime : setCurrentDate}
+            aria-label={isTimeVariable ? "Use current time" : "Use current date"}
+            title={isTimeVariable ? "Use current time" : "Use current date"}
             className="shrink-0 p-3 rounded-xl border-2 border-border text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
           >
-            <Clock3 className="w-5 h-5" />
+            {isTimeVariable ? (
+              <Clock3 className="w-5 h-5" />
+            ) : (
+              <CalendarDays className="w-5 h-5" />
+            )}
           </button>
         )}
       </div>
