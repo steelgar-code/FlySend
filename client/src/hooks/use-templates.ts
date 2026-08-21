@@ -1,24 +1,21 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import {
+  getTemplatesFromStorage,
+  saveTemplatesToStorage,
+  STORAGE_KEY,
+} from "@/lib/storage";
+import type { InsertTemplate, LocalTemplate } from "@/lib/template-types";
 
-export interface LocalTemplate {
-  id: number;
-  title: string;
-  content: string;
-  info: string;
-  time: string;
-  order: number;
-  createdAt: string;
-}
+export type { InsertTemplate, LocalTemplate };
+export { STORAGE_KEY };
 
-export type InsertTemplate = Pick<LocalTemplate, "title" | "content" | "info" | "time">;
-
-const STORAGE_KEY = "whatsapp-templates";
-const EXPORT_HEADER = "# FlySend WA Templates\n# Plain text export - each template is imported as a new template\n\n";
-
-function singleLine(value: string): string {
+export function singleLine(value: string): string {
   return value.replace(/\r?\n/g, " ").trim();
 }
+
+const EXPORT_HEADER =
+  "# FlySend WA Templates\n# Plain text export - each template is imported as a new template\n\n";
 
 export function serializeTemplates(templates: LocalTemplate[]): string {
   return (
@@ -28,7 +25,7 @@ export function serializeTemplates(templates: LocalTemplate[]): string {
       .sort((a, b) => a.order - b.order)
       .map((template) => {
         const metadata = [
-          `[TEMPLATE]`,
+          "[TEMPLATE]",
           `Title: ${singleLine(template.title)}`,
           template.info ? `Info: ${singleLine(template.info)}` : "",
           template.time ? `Time: ${singleLine(template.time)}` : "",
@@ -46,18 +43,18 @@ export function serializeTemplates(templates: LocalTemplate[]): string {
 }
 
 export function parseTemplates(text: string): InsertTemplate[] {
-  const blocks = Array.from(text.matchAll(/^\[TEMPLATE\]\r?\n([\s\S]*?)^\[\/TEMPLATE\]\s*$/gm));
+  const blocks = Array.from(
+    text.matchAll(/^\[TEMPLATE\]\r?\n([\s\S]*?)^\[\/TEMPLATE\]\s*$/gm),
+  );
   if (blocks.length === 0) {
     throw new Error("No template blocks found. Choose a FlySend WA text export.");
   }
-
   return blocks.map((match, index) => {
     const block = match[1].replace(/^\r?\n/, "");
     const contentMarker = block.match(/(?:^|\r?\n)Content:\r?\n/);
     if (!contentMarker || contentMarker.index === undefined) {
       throw new Error(`Template ${index + 1} is missing its Content section.`);
     }
-
     const metadata = block.slice(0, contentMarker.index);
     const contentStart = contentMarker.index + contentMarker[0].length;
     const content = block
@@ -69,7 +66,6 @@ export function parseTemplates(text: string): InsertTemplate[] {
     if (!title) {
       throw new Error(`Template ${index + 1} is missing a Title.`);
     }
-
     return {
       title,
       content,
@@ -77,65 +73,6 @@ export function parseTemplates(text: string): InsertTemplate[] {
       time: metadata.match(/(?:^|\r?\n)Time:\s*(.*)/)?.[1]?.trim() || "",
     };
   });
-}
-
-function getTemplatesFromStorage(): LocalTemplate[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      const defaults: LocalTemplate[] = [
-        {
-          id: 1,
-          title: "Order Ready",
-          content: "Hi {{name}}, your order #{{orderId}} is ready for pickup!",
-          info: "",
-          time: "",
-          order: 0,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 2,
-          title: "Meeting Reminder",
-          content: "Hello {{name}}, reminder for our meeting at {{time}} today. See you there!",
-          info: "",
-          time: "",
-          order: 1,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          title: "Late Running",
-          content: "Hey {{name}}, I'm running about {{minutes}} minutes late. Sorry!",
-          info: "",
-          time: "",
-          order: 2,
-          createdAt: new Date().toISOString(),
-        },
-      ];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-      return defaults;
-    }
-
-    const parsed = JSON.parse(stored) as Partial<LocalTemplate>[];
-    const normalized = parsed.map((template, index) => ({
-      ...template,
-      info: typeof template.info === "string" ? template.info : "",
-      time: typeof template.time === "string" ? template.time : "",
-      order: typeof template.order === "number" ? template.order : index,
-    })) as LocalTemplate[];
-
-    // Persist the new optional fields/order for templates saved by older versions.
-    if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
-      saveTemplatesToStorage(normalized);
-    }
-    return normalized;
-  } catch {
-    return [];
-  }
-}
-
-function saveTemplatesToStorage(templates: LocalTemplate[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
 }
 
 function getNextId(templates: LocalTemplate[]): number {
@@ -146,21 +83,21 @@ function getNextId(templates: LocalTemplate[]): number {
 export function useTemplates() {
   return useQuery({
     queryKey: ["templates"],
-    queryFn: async () => {
-      return getTemplatesFromStorage().sort((a, b) => a.order - b.order);
-    },
+    queryFn: () => getTemplatesFromStorage().sort((a, b) => a.order - b.order),
     staleTime: 0,
+    retry: false,
   });
 }
 
 export function useTemplate(id: number) {
   return useQuery({
     queryKey: ["templates", id],
-    queryFn: async () => {
+    queryFn: () => {
       const templates = getTemplatesFromStorage();
       return templates.find((t) => t.id === id) || null;
     },
     enabled: !!id,
+    retry: false,
   });
 }
 
@@ -177,29 +114,17 @@ export function useCreateTemplate() {
         content: data.content,
         info: data.info,
         time: data.time,
-        order: templates.length === 0
-          ? 0
-          : Math.max(...templates.map((template) => template.order)) + 1,
+        order: templates.length === 0 ? 0 : Math.max(...templates.map((t) => t.order)) + 1,
         createdAt: new Date().toISOString(),
       };
-      templates.push(newTemplate);
-      saveTemplatesToStorage(templates);
+      saveTemplatesToStorage([...templates, newTemplate]);
       return newTemplate;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      toast({
-        title: "Template created",
-        description: "Your new message template is ready to use.",
-      });
+      toast({ title: "Template created", description: "Your new message template is ready to use." });
     },
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message,
-      });
-    },
+    onError: (err) => toast({ variant: "destructive", title: "Error", description: err.message }),
   });
 }
 
@@ -211,13 +136,11 @@ export function useImportTemplates() {
     mutationFn: async (text: string) => {
       const importedTemplates = parseTemplates(text);
       const templates = getTemplatesFromStorage();
-      const nextOrder = templates.length === 0
-        ? 0
-        : Math.max(...templates.map((template) => template.order)) + 1;
-
+      const nextOrder = templates.length === 0 ? 0 : Math.max(...templates.map((t) => t.order)) + 1;
+      const firstId = getNextId(templates);
       const newTemplates: LocalTemplate[] = importedTemplates.map((template, index) => ({
         ...template,
-        id: getNextId(templates) + index,
+        id: firstId + index,
         order: nextOrder + index,
         createdAt: new Date().toISOString(),
       }));
@@ -231,13 +154,7 @@ export function useImportTemplates() {
         description: `${count} ${count === 1 ? "template was" : "templates were"} added to your list.`,
       });
     },
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Import failed",
-        description: err.message,
-      });
-    },
+    onError: (err) => toast({ variant: "destructive", title: "Import failed", description: err.message }),
   });
 }
 
@@ -250,25 +167,17 @@ export function useUpdateTemplate() {
       const templates = getTemplatesFromStorage();
       const index = templates.findIndex((t) => t.id === id);
       if (index === -1) throw new Error("Template not found");
-
-      templates[index] = { ...templates[index], ...updates };
-      saveTemplatesToStorage(templates);
-      return templates[index];
+      const updated = { ...templates[index], ...updates };
+      const next = [...templates];
+      next[index] = updated;
+      saveTemplatesToStorage(next);
+      return updated;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      toast({
-        title: "Template updated",
-        description: "Changes have been saved successfully.",
-      });
+      toast({ title: "Template updated", description: "Changes have been saved successfully." });
     },
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message,
-      });
-    },
+    onError: (err) => toast({ variant: "destructive", title: "Error", description: err.message }),
   });
 }
 
@@ -288,28 +197,19 @@ export function useReorderTemplates() {
     }) => {
       const templates = getTemplatesFromStorage();
       const orderedTemplates = [...templates].sort((a, b) => a.order - b.order);
-      const sourceIndex = orderedTemplates.findIndex((template) => template.id === sourceId);
-      const targetIndex = orderedTemplates.findIndex((template) => template.id === targetId);
+      const sourceIndex = orderedTemplates.findIndex((t) => t.id === sourceId);
+      const targetIndex = orderedTemplates.findIndex((t) => t.id === targetId);
       if (sourceIndex === -1 || targetIndex === -1) throw new Error("Template not found");
 
       const [source] = orderedTemplates.splice(sourceIndex, 1);
-      const nextTargetIndex = orderedTemplates.findIndex((template) => template.id === targetId);
+      const nextTargetIndex = orderedTemplates.findIndex((t) => t.id === targetId);
       orderedTemplates.splice(position === "after" ? nextTargetIndex + 1 : nextTargetIndex, 0, source);
-      orderedTemplates.forEach((template, index) => {
-        template.order = index;
-      });
-      saveTemplatesToStorage(orderedTemplates);
+
+      const reordered = orderedTemplates.map((template, index) => ({ ...template, order: index }));
+      saveTemplatesToStorage(reordered);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
-    },
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Could not reorder templates",
-        description: err.message,
-      });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["templates"] }),
+    onError: (err) => toast({ variant: "destructive", title: "Could not reorder templates", description: err.message }),
   });
 }
 
@@ -326,17 +226,8 @@ export function useDeleteTemplate() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
-      toast({
-        title: "Template deleted",
-        description: "The template has been removed.",
-      });
+      toast({ title: "Template deleted", description: "The template has been removed." });
     },
-    onError: (err) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message,
-      });
-    },
+    onError: (err) => toast({ variant: "destructive", title: "Error", description: err.message }),
   });
 }
