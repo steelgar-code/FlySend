@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#25D366">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FlySend WA">
+<meta name="description" content="Send repeated WhatsApp messages faster with templates">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>FlySend WA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 160 30% 96%;
+    --secondary-foreground: 160 84% 39%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 160 84% 39%;
+    --radius: 1rem;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:hsl(var(--background));
+    color:hsl(var(--foreground));
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  ::selection{background:hsl(var(--primary) / .2);color:hsl(var(--primary));}
+  h1,h2,h3{font-family:var(--font-display);font-weight:800;letter-spacing:-0.01em;margin:0;}
+  p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:var(--font-body);}
+  .hidden{display:none !important;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  :focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px;}
+
+  /* ---------- Shared layout ---------- */
+  .max-w-5{max-width:64rem;margin:0 auto;}
+  .max-w-2{max-width:42rem;margin:0 auto;}
+  .px{padding-left:16px;padding-right:16px;}
+  @media (min-width:640px){ .px{padding-left:24px;padding-right:24px;} }
+
+  /* ---------- Topbar (Home) ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:10;background:hsl(var(--background) / .8);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid hsl(var(--border) / .5);
+  }
+  .topbar-inner{padding:16px;}
+  @media (min-width:640px){ .topbar-inner{padding:16px 24px;} }
+  .brand-row{display:flex;flex-direction:column;gap:16px;justify-content:space-between;}
+  @media (min-width:640px){ .brand-row{flex-direction:row;align-items:center;} }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand img{width:40px;height:40px;border-radius:10px;}
+  .brand h1{font-size:24px;color:hsl(var(--foreground));}
+  .brand-tagline{font-size:13px;color:hsl(var(--muted-foreground));display:none;}
+  @media (min-width:640px){ .brand-tagline{display:block;margin-top:2px;} }
+  .search-wrap{position:relative;width:100%;}
+  @media (min-width:640px){ .search-wrap{width:288px;} }
+  .search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:hsl(var(--muted-foreground));pointer-events:none;}
+  .search-wrap input{
+    width:100%;padding:8px 16px 8px 40px;border-radius:12px;
+    background:hsl(var(--secondary) / .5);border:2px solid transparent;color:hsl(var(--foreground));
+    font-size:14px;outline:none;transition:all .2s;
+  }
+  .search-wrap input::placeholder{color:hsl(var(--muted-foreground));}
+  .search-wrap input:focus{background:hsl(var(--background));border-color:hsl(var(--primary));box-shadow:0 0 0 4px hsl(var(--primary) / .1);}
+
+  /* ---------- Buttons ---------- */
+  .btn-primary{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 24px;border-radius:12px;font-weight:600;border:none;cursor:pointer;
+    background:linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary) / .9));
+    color:hsl(var(--primary-foreground));
+    box-shadow:0 10px 25px -8px hsl(var(--primary) / .35);
+    transition:all .2s ease-out;
+  }
+  .btn-primary:hover:not(:disabled){box-shadow:0 14px 30px -8px hsl(var(--primary) / .4);transform:translateY(-1px);}
+  .btn-primary:active:not(:disabled){transform:translateY(0);}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .btn-secondary{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 24px;border-radius:12px;font-weight:600;border:none;cursor:pointer;
+    background:hsl(var(--secondary));color:hsl(var(--secondary-foreground));
+    transition:all .2s ease-out;
+  }
+  .btn-secondary:hover:not(:disabled){background:hsl(var(--secondary) / .8);transform:translateY(-1px);}
+  .btn-secondary:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* ---------- Main / grid ---------- */
+  .main-content{padding:32px 16px;}
+  @media (min-width:640px){ .main-content{padding:32px 24px;} }
+  .template-grid{display:grid;grid-template-columns:1fr;gap:24px;}
+  @media (min-width:768px){ .template-grid{grid-template-columns:1fr 1fr;} }
+  @media (min-width:1024px){ .template-grid{grid-template-columns:1fr 1fr 1fr;} }
+
+  /* ---------- Template card ---------- */
+  .template-card{
+    position:relative;background:hsl(var(--card));border-radius:16px;padding:24px;
+    border:1px solid hsl(var(--border) / .5);box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition:box-shadow .3s, border-color .3s, transform .2s;
+    opacity:0;transform:translateY(14px);animation:cardIn .35s ease-out forwards;
+  }
+  @keyframes cardIn{ to{opacity:1;transform:translateY(0);} }
+  .template-card:hover{box-shadow:0 20px 40px -12px hsl(var(--primary) / .08);border-color:hsl(var(--primary) / .2);transform:translateY(-4px);}
+  .template-card.dragging{opacity:.5;box-shadow:0 0 0 2px hsl(var(--primary) / .3);}
+  .tc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:8px;}
+  .tc-heading{display:flex;align-items:flex-start;gap:8px;min-width:0;}
+  .tc-grip{width:16px;height:16px;margin-top:4px;flex-shrink:0;color:hsl(var(--muted-foreground) / .5);cursor:grab;}
+  .tc-title-wrap{min-width:0;}
+  .tc-title{font-size:20px;color:hsl(var(--foreground));transition:color .2s;}
+  .template-card:hover .tc-title{color:hsl(var(--primary));}
+  .tc-info{font-size:12px;color:hsl(var(--muted-foreground));margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tc-time{font-size:12px;color:hsl(var(--muted-foreground));margin-top:4px;display:flex;align-items:center;gap:4px;}
+  .tc-time svg{width:12px;height:12px;flex-shrink:0;}
+  .tc-badge-row{margin-top:6px;}
+  .tc-badge{display:inline-block;font-size:12px;font-weight:500;padding:2px 10px;border-radius:999px;}
+  .tc-badge.has-vars{background:hsl(var(--primary) / .1);color:hsl(var(--primary));}
+  .tc-badge.no-vars{background:hsl(var(--muted));color:hsl(var(--muted-foreground));}
+  .tc-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+  .icon-btn{
+    padding:8px;border-radius:8px;border:none;background:none;cursor:pointer;
+    color:hsl(var(--muted-foreground));transition:background .15s,color .15s;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .icon-btn svg{width:16px;height:16px;}
+  .icon-btn:hover:not(:disabled){background:hsl(var(--primary) / .05);color:hsl(var(--primary));}
+  .icon-btn:disabled{opacity:.3;cursor:not-allowed;}
+  .icon-btn.danger:hover:not(:disabled){background:hsl(var(--destructive) / .05);color:hsl(var(--destructive));}
+  .tc-content{
+    font-size:14px;color:hsl(var(--muted-foreground));line-height:1.6;margin-bottom:24px;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .tc-use-btn{
+    width:100%;padding:12px;border-radius:12px;border:none;cursor:pointer;font-weight:600;
+    background:hsl(var(--primary) / .1);color:hsl(var(--primary));
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:all .2s;
+  }
+  .tc-use-btn:hover{background:hsl(var(--primary));color:hsl(var(--primary-foreground));box-shadow:0 10px 25px -8px hsl(var(--primary) / .2);}
+  .tc-use-btn svg{width:16px;height:16px;}
+  .tc-use-btn .tc-arrow{margin-left:auto;opacity:.5;}
+  .tc-use-btn:hover .tc-arrow{opacity:1;}
+
+  /* ---------- Empty state ---------- */
+  .empty-state{text-align:center;padding:80px 20px;}
+  .empty-icon{background:hsl(var(--secondary));border-radius:999px;padding:24px;width:96px;height:96px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;}
+  .empty-icon svg{width:40px;height:40px;color:hsl(var(--muted-foreground));}
+  .empty-state h3{font-size:20px;color:hsl(var(--foreground));}
+  .empty-state p{color:hsl(var(--muted-foreground));margin-top:8px;max-width:340px;margin-left:auto;margin-right:auto;margin-bottom:32px;}
+  .empty-state code{background:hsl(var(--muted));padding:1px 5px;border-radius:4px;font-size:13px;}
+
+  /* ---------- IO footer ---------- */
+  .io-footer{
+    margin-top:40px;padding-top:24px;border-top:1px solid hsl(var(--border) / .5);
+    display:flex;flex-direction:column;gap:12px;
+  }
+  @media (min-width:640px){ .io-footer{flex-direction:row;align-items:center;justify-content:space-between;} }
+  .io-footer p{font-size:14px;color:hsl(var(--muted-foreground));}
+  .io-footer .io-actions{display:flex;align-items:center;gap:8px;}
+  .io-footer .btn-secondary{flex:1;border-radius:12px;padding:10px 18px;font-size:14px;}
+  @media (min-width:640px){ .io-footer .btn-secondary{flex:none;} }
+  .io-footer svg{width:16px;height:16px;}
+
+  /* ---------- FAB ---------- */
+  .fab{
+    position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:999px;border:none;
+    background:hsl(var(--primary));color:hsl(var(--primary-foreground));
+    box-shadow:0 10px 25px -6px hsl(var(--primary) / .3);
+    display:flex;align-items:center;justify-content:center;z-index:40;cursor:pointer;
+    transition:transform .15s;
+  }
+  .fab:hover{transform:scale(1.05);}
+  .fab:active{transform:scale(.95);}
+  .fab svg{width:24px;height:24px;}
+  @media (min-width:640px){ .fab{display:none;} }
+
+  /* ---------- Form / detail headers (Create, Edit, Send) ---------- */
+  .page-header{position:sticky;top:0;z-index:10;background:hsl(var(--background) / .8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid hsl(var(--border) / .5);}
+  .page-header-inner{padding:16px;display:flex;align-items:center;justify-content:space-between;}
+  .page-header-left{display:flex;align-items:center;gap:16px;min-width:0;}
+  .back-btn{padding:8px;margin-left:-8px;border-radius:999px;border:none;background:none;color:hsl(var(--muted-foreground));cursor:pointer;display:inline-flex;flex-shrink:0;}
+  .back-btn:hover{background:hsl(var(--secondary));}
+  .back-btn svg{width:20px;height:20px;}
+  .page-header h1{font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .send-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:hsl(var(--muted-foreground));overflow:hidden;}
+  .send-meta span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .send-meta .send-meta-time{display:flex;align-items:center;gap:4px;}
+  .send-meta svg{width:12px;height:12px;flex-shrink:0;}
+
+  /* ---------- Form ---------- */
+  .form-main{padding:32px 16px 32px;}
+  .form-stack{display:flex;flex-direction:column;gap:32px;}
+  .field-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+  .field-label{font-size:16px;font-weight:600;color:hsl(var(--foreground));display:block;margin-bottom:8px;}
+  .field-desc{font-size:13px;color:hsl(var(--muted-foreground));margin-top:8px;}
+  .field-error{font-size:13px;color:hsl(var(--destructive));margin-top:8px;display:none;}
+  .field-error.show{display:block;}
+  .input-field{
+    width:100%;padding:12px 16px;border-radius:12px;background:hsl(var(--background));
+    border:2px solid hsl(var(--border));color:hsl(var(--foreground));font-size:15px;
+    outline:none;transition:all .2s;font-family:var(--font-body);
+  }
+  .input-field::placeholder{color:hsl(var(--muted-foreground));}
+  .input-field:focus{border-color:hsl(var(--primary));box-shadow:0 0 0 4px hsl(var(--primary) / .1);}
+  textarea.input-field{min-height:200px;resize:none;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;}
+  .field-title-input{font-size:18px;font-weight:500;}
+  .form-grid-2{display:grid;gap:32px;}
+  @media (min-width:640px){ .form-grid-2{grid-template-columns:1fr 1fr;} }
+  .var-tip{
+    display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;color:hsl(var(--primary));
+    background:hsl(var(--primary) / .1);padding:4px 10px;border-radius:999px;cursor:help;position:relative;
+  }
+  .var-tip svg{width:12px;height:12px;}
+  .var-tip .tip-pop{
+    display:none;position:absolute;right:0;top:calc(100% + 8px);width:240px;background:hsl(var(--foreground));
+    color:hsl(var(--background));font-weight:400;font-size:12.5px;line-height:1.5;padding:12px 14px;border-radius:10px;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);z-index:20;text-align:left;cursor:default;
+  }
+  .var-tip .tip-pop code{display:block;margin-top:8px;background:hsl(var(--background) / .12);padding:6px 8px;border-radius:6px;font-family:ui-monospace,monospace;}
+  .var-tip:hover .tip-pop, .var-tip:focus .tip-pop{display:block;}
+  .form-submit-wrap{position:fixed;left:0;right:0;bottom:0;padding:16px;background:hsl(var(--background));border-top:1px solid hsl(var(--border) / .5);}
+  @media (min-width:640px){ .form-submit-wrap{position:static;border:none;background:none;padding:0;} }
+  .form-submit-wrap .btn-primary{width:100%;font-size:17px;padding:16px;}
+  .form-spacer{height:80px;}
+  @media (min-width:640px){ .form-spacer{display:none;} }
+  .form-notfound{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;}
+  .form-notfound h1{font-size:22px;}
+  .form-notfound a{color:hsl(var(--primary));}
+  .form-notfound a:hover{text-decoration:underline;}
+
+  /* ---------- Send view ---------- */
+  .send-main{padding:32px 16px 128px;}
+  .send-stack{display:grid;gap:32px;}
+  .var-input-row{display:flex;flex-direction:column;gap:8px;opacity:0;transform:translateX(-12px);animation:varIn .3s ease-out forwards;}
+  @keyframes varIn{ to{opacity:1;transform:translateX(0);} }
+  .var-label{font-size:14px;font-weight:500;color:hsl(var(--foreground));text-transform:capitalize;}
+  .var-input-inline{display:flex;align-items:center;gap:8px;}
+  .var-input-inline .input-field{flex:1;}
+  .var-autofill-btn{
+    flex-shrink:0;padding:12px;border-radius:12px;border:2px solid hsl(var(--border));background:none;
+    color:hsl(var(--muted-foreground));cursor:pointer;display:inline-flex;transition:all .15s;
+  }
+  .var-autofill-btn:hover{border-color:hsl(var(--primary));color:hsl(var(--primary));background:hsl(var(--primary) / .05);}
+  .var-autofill-btn svg{width:20px;height:20px;}
+  .preview-label{font-size:13px;font-weight:600;color:hsl(var(--muted-foreground));text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+  .preview-card{
+    position:relative;overflow:hidden;background:#fff;border:1px solid hsl(var(--border));
+    border-radius:14px;padding:24px;box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .preview-card .deco-icon{position:absolute;top:0;right:0;padding:16px;opacity:.05;}
+  .preview-card .deco-icon svg{width:96px;height:96px;}
+  .preview-text{position:relative;z-index:1;white-space:pre-wrap;font-size:17px;line-height:1.65;}
+  .preview-placeholder{background:hsl(var(--primary) / .1);color:hsl(var(--primary));padding:0 3px;border-radius:4px;font-weight:500;margin:0 1px;}
+  .send-footer{
+    position:fixed;left:0;right:0;bottom:0;padding:16px;background:hsl(var(--background));
+    border-top:1px solid hsl(var(--border) / .5);box-shadow:0 -4px 20px rgba(0,0,0,.05);
+  }
+  .send-footer-inner{max-width:42rem;margin:0 auto;display:flex;gap:12px;}
+  .send-copy-btn{
+    flex:1;height:56px;border-radius:12px;font-size:15px;font-weight:600;border:1px solid hsl(var(--border) / .5);
+    background:hsl(var(--secondary));color:hsl(var(--secondary-foreground));cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;
+  }
+  .send-copy-btn:hover{background:hsl(var(--secondary) / .8);}
+  .send-copy-btn svg{width:20px;height:20px;}
+  .send-copy-btn.copied svg{color:#16a34a;}
+  .send-whatsapp-btn{
+    flex:2;height:56px;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer;
+    background:linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary) / .9));color:hsl(var(--primary-foreground));
+    box-shadow:0 10px 25px -8px hsl(var(--primary) / .3);
+    display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;
+  }
+  .send-whatsapp-btn:hover{transform:translateY(-1px);}
+  .send-whatsapp-btn svg{width:20px;height:20px;}
+
+  /* ---------- Toasts ---------- */
+  #toastContainer{position:fixed;top:16px;right:16px;left:16px;z-index:100;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none;}
+  @media (min-width:480px){ #toastContainer{left:auto;} }
+  .toast{
+    pointer-events:auto;max-width:360px;width:100%;background:hsl(var(--card));border:1px solid hsl(var(--border));
+    border-radius:12px;padding:14px 16px;box-shadow:0 12px 30px rgba(0,0,0,.12);
+    opacity:0;transform:translateY(-8px) scale(.98);transition:opacity .2s,transform .2s;
+  }
+  .toast.show{opacity:1;transform:translateY(0) scale(1);}
+  .toast-title{font-size:14px;font-weight:600;color:hsl(var(--foreground));}
+  .toast-desc{font-size:13px;color:hsl(var(--muted-foreground));margin-top:2px;}
+  .toast.toast-destructive{border-color:hsl(var(--destructive) / .4);background:hsl(var(--destructive) / .06);}
+  .toast.toast-destructive .toast-title{color:hsl(var(--destructive));}
+
+  /* ---------- Install prompt ---------- */
+  .install-prompt{
+    position:fixed;bottom:80px;left:16px;right:16px;background:hsl(var(--card));border:1px solid hsl(var(--border));
+    border-radius:12px;padding:16px;box-shadow:0 12px 30px rgba(0,0,0,.15);z-index:50;
+  }
+  @media (min-width:640px){ .install-prompt{left:auto;right:16px;bottom:16px;width:320px;} }
+  .install-close{position:absolute;top:8px;right:8px;padding:4px;border:none;background:none;color:hsl(var(--muted-foreground));cursor:pointer;border-radius:6px;}
+  .install-close:hover{color:hsl(var(--foreground));}
+  .install-close svg{width:16px;height:16px;}
+  .install-row{display:flex;align-items:flex-start;gap:12px;}
+  .install-row img{width:48px;height:48px;border-radius:12px;flex-shrink:0;object-fit:cover;}
+  .install-row h3{font-size:15px;font-weight:600;}
+  .install-row p{font-size:13px;color:hsl(var(--muted-foreground));margin-top:2px;}
+  .install-prompt .btn-primary{width:100%;margin-top:16px;padding:10px;font-size:14px;}
+  .install-prompt .btn-primary svg{width:16px;height:16px;}
+
+  .spin{animation:spin 1s linear infinite;}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+  .loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:256px;gap:16px;}
+  .loading-wrap svg{width:32px;height:32px;color:hsl(var(--primary));}
+  .loading-wrap p{color:hsl(var(--muted-foreground));font-weight:500;}
+
+  @media (prefers-reduced-motion: reduce){
+    .template-card,.var-input-row{animation:none;opacity:1;transform:none;}
+    *{transition-duration:.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<!-- ================= HOME VIEW ================= -->
+<section id="view-home" class="view">
+  <header class="topbar">
+    <div class="topbar-inner max-w-5">
+      <div class="brand-row">
+        <div class="brand">
+          <img src="icon-192.png" alt="FlySend WA">
+          <div>
+            <h1>FlySend WA</h1>
+            <p class="brand-tagline">Send repeated WhatsApp messages faster.</p>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search templates...">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content max-w-5">
+    <div id="templateGrid" class="template-grid"></div>
+
+    <div id="homeEmpty" class="empty-state hidden">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <h3>No templates yet</h3>
+      <p>Create your first message template to get started. Use variables like <code>{{name}}</code> for dynamic content.</p>
+      <a href="#/create" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Template
+      </a>
+    </div>
+
+    <div class="io-footer">
+      <p>Back up or add templates using a plain-text export file.</p>
+      <div class="io-actions">
+        <button type="button" id="btnExport" class="btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button type="button" id="btnImport" class="btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span id="btnImportLabel">Import</span>
+        </button>
+        <input type="file" id="importFileInput" accept=".txt,text/plain" class="hidden" aria-label="Import templates text file">
+      </div>
+    </div>
+  </main>
+
+  <button type="button" id="fab" class="fab" aria-label="Create template">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</section>
+
+<!-- ================= TEMPLATE FORM VIEW (Create + Edit) ================= -->
+<section id="view-form" class="view hidden">
+  <header class="page-header">
+    <div class="page-header-inner max-w-2">
+      <div class="page-header-left">
+        <a href="#/" class="back-btn" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <h1 id="formHeaderTitle">New Template</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="form-main max-w-2">
+    <div id="formNotFound" class="form-notfound hidden">
+      <h1>Template not found</h1>
+      <a href="#/">Go Home</a>
+    </div>
+
+    <form id="templateForm" class="form-stack">
+      <div class="field">
+        <label class="field-label" for="fieldTitle">Template Title</label>
+        <input id="fieldTitle" name="title" type="text" class="input-field field-title-input" placeholder="e.g., Order Confirmation" autocomplete="off">
+        <p class="field-desc" id="formTitleDesc">A short name to identify this template.</p>
+        <p class="field-error" id="errTitle">Title is required</p>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label class="field-label" for="fieldContent" style="margin-bottom:0;">Message Content</label>
+          <span class="var-tip" id="formContentTooltip" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            How to use variables
+            <span class="tip-pop">Wrap text in double curly braces to create a variable placeholder.<code>Hi {{name}}, your order {{order_id}} is ready!</code></span>
+          </span>
+        </div>
+        <textarea id="fieldContent" name="content" class="input-field" placeholder="Hi {{name}}, just following up on..." style="margin-top:8px;"></textarea>
+        <p class="field-desc" id="formContentDesc">Variables will become input fields when you use this template.</p>
+        <p class="field-error" id="errContent">Content is required</p>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label class="field-label" for="fieldInfo">Info</label>
+          <input id="fieldInfo" name="info" type="text" class="input-field" placeholder="e.g., For returning customers" autocomplete="off">
+          <p class="field-desc">Optional detail shown with the template.</p>
+        </div>
+        <div class="field">
+          <label class="field-label" for="fieldTime">Time</label>
+          <input id="fieldTime" name="time" type="text" class="input-field" placeholder="e.g., Weekdays at 9:00" autocomplete="off">
+          <p class="field-desc">Optional time information for regular messages.</p>
+        </div>
+      </div>
+
+      <div class="form-submit-wrap">
+        <div class="max-w-2">
+          <button type="submit" class="btn-primary" id="formSubmitBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span id="formSubmitLabel">Save Template</span>
+          </button>
+        </div>
+      </div>
+      <div class="form-spacer"></div>
+    </form>
+  </main>
+</section>
+
+<!-- ================= SEND VIEW ================= -->
+<section id="view-send" class="view hidden">
+  <header class="page-header">
+    <div class="page-header-inner max-w-2">
+      <div class="page-header-left">
+        <a href="#/" class="back-btn" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <div style="overflow:hidden;">
+          <h1 id="sendTitle">Template</h1>
+          <div id="sendMeta" class="send-meta hidden"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="sendNotFound" class="form-notfound hidden">
+    <h1>Template not found</h1>
+    <a href="#/">Go Home</a>
+  </div>
+
+  <main id="sendContent" class="send-main max-w-2">
+    <div class="send-stack">
+      <div id="sendVariables" style="display:flex;flex-direction:column;gap:24px;"></div>
+
+      <div>
+        <p class="preview-label">Preview</p>
+        <div class="preview-card">
+          <div class="deco-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+          <div id="sendPreview" class="preview-text"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="sendFooter" class="send-footer">
+    <div class="send-footer-inner">
+      <button type="button" id="btnCopy" class="send-copy-btn">
+        <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span id="copyLabel">Copy</span>
+      </button>
+      <button type="button" id="btnWhatsApp" class="send-whatsapp-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send to WhatsApp
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 404 ================= -->
+<section id="view-notfound" class="view hidden">
+  <div class="form-notfound" style="min-height:100vh;">
+    <h1 style="font-size:26px;">404 — Page not found</h1>
+    <a href="#/" class="btn-primary" style="margin-top:8px;display:inline-flex;">Go Home</a>
+  </div>
+</section>
+
+<!-- ================= Install prompt ================= -->
+<div id="installPrompt" class="install-prompt hidden">
+  <button type="button" id="installDismiss" class="install-close" aria-label="Dismiss">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="install-row">
+    <img src="icon-192.png" alt="FlySend WA">
+    <div>
+      <h3>Install FlySend WA</h3>
+      <p>Add to home screen for quick access</p>
+    </div>
+  </div>
+  <button type="button" id="installBtn" class="btn-primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Install App
+  </button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "whatsapp-templates";
+  var EXPORT_HEADER = "# FlySend WA Templates\n# Plain text export - each template is imported as a new template\n\n";
+
+  // ================= Data layer (ported 1:1 from use-templates.ts) =================
+
+  function singleLine(value){
+    return String(value == null ? "" : value).replace(/\r?\n/g, " ").trim();
+  }
+
+  function serializeTemplates(list){
+    return EXPORT_HEADER + list.slice().sort(function(a,b){ return a.order - b.order; }).map(function(template){
+      var metadata = [
+        "[TEMPLATE]",
+        "Title: " + singleLine(template.title),
+        template.info ? "Info: " + singleLine(template.info) : "",
+        template.time ? "Time: " + singleLine(template.time) : "",
+        "Content:"
+      ].filter(Boolean);
+      var content = template.content
+        .replace(/\r\n/g, "\n")
+        .split("\n")
+        .map(function(line){ return line === "[/TEMPLATE]" ? "\\[/TEMPLATE]" : line; })
+        .join("\n");
+      return metadata.join("\n") + "\n" + content + "\n[/TEMPLATE]";
+    }).join("\n\n");
+  }
+
+  function parseTemplates(text){
+    var blocks = Array.from(text.matchAll(/^\[TEMPLATE\]\r?\n([\s\S]*?)^\[\/TEMPLATE\]\s*$/gm));
+    if(blocks.length === 0){
+      throw new Error("No template blocks found. Choose a FlySend WA text export.");
+    }
+    return blocks.map(function(match, index){
+      var block = match[1].replace(/^\r?\n/, "");
+      var contentMarker = block.match(/(?:^|\r?\n)Content:\r?\n/);
+      if(!contentMarker || contentMarker.index === undefined){
+        throw new Error("Template " + (index + 1) + " is missing its Content section.");
+      }
+      var metadata = block.slice(0, contentMarker.index);
+      var contentStart = contentMarker.index + contentMarker[0].length;
+      var content = block.slice(contentStart)
+        .replace(/\\\[\/TEMPLATE\]/g, "[/TEMPLATE]")
+        .replace(/\r\n/g, "\n")
+        .replace(/\n$/, "");
+      var titleMatch = metadata.match(/(?:^|\r?\n)Title:\s*(.*)/);
+      var title = titleMatch && titleMatch[1] ? titleMatch[1].trim() : "";
+      if(!title){
+        throw new Error("Template " + (index + 1) + " is missing a Title.");
+      }
+      var infoMatch = metadata.match(/(?:^|\r?\n)Info:\s*(.*)/);
+      var timeMatch = metadata.match(/(?:^|\r?\n)Time:\s*(.*)/);
+      return {
+        title: title,
+        content: content,
+        info: infoMatch && infoMatch[1] ? infoMatch[1].trim() : "",
+        time: timeMatch && timeMatch[1] ? timeMatch[1].trim() : ""
+      };
+    });
+  }
+
+  function getTemplatesFromStorage(){
+    try{
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if(!stored){
+        var defaults = [
+          { id:1, title:"Order Ready", content:"Hi {{name}}, your order #{{orderId}} is ready for pickup!", info:"", time:"", order:0, createdAt:new Date().toISOString() },
+          { id:2, title:"Meeting Reminder", content:"Hello {{name}}, reminder for our meeting at {{time}} today. See you there!", info:"", time:"", order:1, createdAt:new Date().toISOString() },
+          { id:3, title:"Late Running", content:"Hey {{name}}, I'm running about {{minutes}} minutes late. Sorry!", info:"", time:"", order:2, createdAt:new Date().toISOString() }
+        ];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+        return defaults;
+      }
+      var parsed = JSON.parse(stored);
+      var normalized = parsed.map(function(template, index){
+        var copy = {};
+        for(var k in template){ if(Object.prototype.hasOwnProperty.call(template,k)) copy[k]=template[k]; }
+        copy.info = typeof template.info === "string" ? template.info : "";
+        copy.time = typeof template.time === "string" ? template.time : "";
+        copy.order = typeof template.order === "number" ? template.order : index;
+        return copy;
+      });
+      if(JSON.stringify(parsed) !== JSON.stringify(normalized)){
+        saveTemplatesToStorage(normalized);
+      }
+      return normalized;
+    }catch(e){
+      console.error("Failed to load templates:", e);
+      return [];
+    }
+  }
+
+  function saveTemplatesToStorage(list){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  var templates = getTemplatesFromStorage();
+
+  function getAll(){
+    return templates.slice().sort(function(a,b){ return a.order - b.order; });
+  }
+
+  function getNextId(list){
+    if(list.length === 0) return 1;
+    return Math.max.apply(null, list.map(function(t){ return t.id; })) + 1;
+  }
+
+  function createTemplate(data){
+    var all = getAll();
+    var newTemplate = {
+      id: getNextId(all),
+      title: data.title,
+      content: data.content,
+      info: data.info,
+      time: data.time,
+      order: all.length === 0 ? 0 : Math.max.apply(null, all.map(function(t){ return t.order; })) + 1,
+      createdAt: new Date().toISOString()
+    };
+    templates.push(newTemplate);
+    saveTemplatesToStorage(templates);
+    return newTemplate;
+  }
+
+  function updateTemplateById(id, updates){
+    var idx = templates.findIndex(function(t){ return t.id === id; });
+    if(idx === -1) throw new Error("Template not found");
+    var merged = {};
+    for(var k in templates[idx]){ merged[k] = templates[idx][k]; }
+    for(var k2 in updates){ merged[k2] = updates[k2]; }
+    templates[idx] = merged;
+    saveTemplatesToStorage(templates);
+    return templates[idx];
+  }
+
+  function deleteTemplateById(id){
+    var before = templates.length;
+    templates = templates.filter(function(t){ return t.id !== id; });
+    if(templates.length === before) throw new Error("Template not found");
+    saveTemplatesToStorage(templates);
+  }
+
+  function reorderTemplates(sourceId, targetId, position){
+    position = position || "before";
+    var ordered = getAll();
+    var sourceIndex = ordered.findIndex(function(t){ return t.id === sourceId; });
+    var targetIndex = ordered.findIndex(function(t){ return t.id === targetId; });
+    if(sourceIndex === -1 || targetIndex === -1) throw new Error("Template not found");
+    var source = ordered.splice(sourceIndex, 1)[0];
+    var nextTargetIndex = ordered.findIndex(function(t){ return t.id === targetId; });
+    ordered.splice(position === "after" ? nextTargetIndex + 1 : nextTargetIndex, 0, source);
+    ordered.forEach(function(t, i){ t.order = i; });
+    templates = ordered;
+    saveTemplatesToStorage(templates);
+  }
+
+  function importTemplatesFromText(text){
+    var importedTemplates = parseTemplates(text);
+    var all = getAll();
+    var nextOrder = all.length === 0 ? 0 : Math.max.apply(null, all.map(function(t){ return t.order; })) + 1;
+    var newTemplates = importedTemplates.map(function(t, index){
+      return {
+        title: t.title, content: t.content, info: t.info, time: t.time,
+        id: getNextId(all) + index,
+        order: nextOrder + index,
+        createdAt: new Date().toISOString()
+      };
+    });
+    templates = templates.concat(newTemplates);
+    saveTemplatesToStorage(templates);
+    return newTemplates.length;
+  }
+
+  function downloadTextFile(text, filename){
+    var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  // ================= Toasts =================
+
+  var toastContainer = document.getElementById("toastContainer");
+  function toast(title, description, variant){
+    var el = document.createElement("div");
+    el.className = "toast" + (variant === "destructive" ? " toast-destructive" : "");
+    if(title){
+      var t = document.createElement("div");
+      t.className = "toast-title";
+      t.textContent = title;
+      el.appendChild(t);
+    }
+    if(description){
+      var d = document.createElement("div");
+      d.className = "toast-desc";
+      d.textContent = description;
+      el.appendChild(d);
+    }
+    toastContainer.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add("show"); });
+    setTimeout(function(){
+      el.classList.remove("show");
+      setTimeout(function(){ el.remove(); }, 250);
+    }, 3200);
+  }
+
+  // ================= Router =================
+
+  function parseRoute(){
+    var hash = location.hash.replace(/^#/, "") || "/";
+    if(hash === "/" || hash === "") return { name: "home" };
+    var m = hash.match(/^\/create\/?$/);
+    if(m) return { name: "create" };
+    m = hash.match(/^\/edit\/(\d+)\/?$/);
+    if(m) return { name: "edit", id: parseInt(m[1], 10) };
+    m = hash.match(/^\/send\/(\d+)\/?$/);
+    if(m) return { name: "send", id: parseInt(m[1], 10) };
+    return { name: "notfound" };
+  }
+
+  var VIEW_MAP = { home:"view-home", create:"view-form", edit:"view-form", send:"view-send", notfound:"view-notfound" };
+
+  function render(){
+    var route = parseRoute();
+    document.querySelectorAll(".view").forEach(function(v){ v.classList.add("hidden"); });
+    document.getElementById(VIEW_MAP[route.name]).classList.remove("hidden");
+    window.scrollTo(0, 0);
+    if(route.name === "home") renderHome();
+    else if(route.name === "create") renderForm("create", null);
+    else if(route.name === "edit") renderForm("edit", route.id);
+    else if(route.name === "send") renderSend(route.id);
+  }
+
+  window.addEventListener("hashchange", render);
+
+  // ================= Home view =================
+
+  var searchQuery = "";
+  var draggedId = null;
+
+  var templateGrid = document.getElementById("templateGrid");
+  var homeEmpty = document.getElementById("homeEmpty");
+
+  function iconMove(dir){
+    return dir === "up"
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  }
+
+  function buildTemplateCard(template, orderedAll){
+    var idx = orderedAll.findIndex(function(t){ return t.id === template.id; });
+    var canMoveUp = idx > 0;
+    var canMoveDown = idx < orderedAll.length - 1;
+    var variables = (template.content.match(/{{(.*?)}}/g) || []).length;
+
+    var card = document.createElement("div");
+    card.className = "template-card";
+    card.draggable = true;
+    card.addEventListener("dragstart", function(){ draggedId = template.id; card.classList.add("dragging"); });
+    card.addEventListener("dragend", function(){ card.classList.remove("dragging"); });
+    card.addEventListener("dragover", function(e){ e.preventDefault(); });
+    card.addEventListener("drop", function(){
+      if(draggedId !== null && draggedId !== template.id){
+        try{ reorderTemplates(draggedId, template.id); renderHome(); }
+        catch(e){ toast("Could not reorder templates", e.message, "destructive"); }
+      }
+      draggedId = null;
+    });
+
+    var top = document.createElement("div");
+    top.className = "tc-top";
+
+    var heading = document.createElement("div");
+    heading.className = "tc-heading";
+    heading.innerHTML =
+      '<svg class="tc-grip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg>';
+    var titleWrap = document.createElement("div");
+    titleWrap.className = "tc-title-wrap";
+    var titleEl = document.createElement("h3");
+    titleEl.className = "tc-title";
+    titleEl.textContent = template.title;
+    titleWrap.appendChild(titleEl);
+    if(template.info){
+      var infoEl = document.createElement("p");
+      infoEl.className = "tc-info";
+      infoEl.textContent = template.info;
+      titleWrap.appendChild(infoEl);
+    }
+    if(template.time){
+      var timeEl = document.createElement("p");
+      timeEl.className = "tc-time";
+      timeEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span></span>';
+      timeEl.querySelector("span").textContent = template.time;
+      titleWrap.appendChild(timeEl);
+    }
+    var badgeRow = document.createElement("p");
+    badgeRow.className = "tc-badge-row";
+    var badge = document.createElement("span");
+    if(variables > 0){
+      badge.className = "tc-badge has-vars";
+      badge.textContent = variables + (variables === 1 ? " variable" : " variables");
+    }else{
+      badge.className = "tc-badge no-vars";
+      badge.textContent = "Static message";
+    }
+    badgeRow.appendChild(badge);
+    titleWrap.appendChild(badgeRow);
+    heading.appendChild(titleWrap);
+    top.appendChild(heading);
+
+    var actions = document.createElement("div");
+    actions.className = "tc-actions";
+    var upBtn = document.createElement("button");
+    upBtn.type = "button"; upBtn.className = "icon-btn"; upBtn.innerHTML = iconMove("up");
+    upBtn.disabled = !canMoveUp;
+    upBtn.setAttribute("aria-label", "Move " + template.title + " up");
+    upBtn.addEventListener("click", function(){ moveTemplate(template.id, "up"); });
+    var downBtn = document.createElement("button");
+    downBtn.type = "button"; downBtn.className = "icon-btn"; downBtn.innerHTML = iconMove("down");
+    downBtn.disabled = !canMoveDown;
+    downBtn.setAttribute("aria-label", "Move " + template.title + " down");
+    downBtn.addEventListener("click", function(){ moveTemplate(template.id, "down"); });
+    var editLink = document.createElement("a");
+    editLink.className = "icon-btn"; editLink.href = "#/edit/" + template.id;
+    editLink.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+    var delBtn = document.createElement("button");
+    delBtn.type = "button"; delBtn.className = "icon-btn danger";
+    delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+    delBtn.addEventListener("click", function(){
+      if(confirm("Delete \"" + template.title + "\"? This will permanently delete it. This action cannot be undone.")){
+        try{ deleteTemplateById(template.id); toast("Template deleted", "The template has been removed."); renderHome(); }
+        catch(e){ toast("Error", e.message, "destructive"); }
+      }
+    });
+    actions.appendChild(upBtn); actions.appendChild(downBtn); actions.appendChild(editLink); actions.appendChild(delBtn);
+    top.appendChild(actions);
+    card.appendChild(top);
+
+    var contentP = document.createElement("p");
+    contentP.className = "tc-content";
+    contentP.textContent = template.content;
+    card.appendChild(contentP);
+
+    var useBtn = document.createElement("a");
+    useBtn.href = "#/send/" + template.id;
+    useBtn.className = "tc-use-btn";
+    useBtn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+      "Use Template" +
+      '<svg class="tc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    card.appendChild(useBtn);
+
+    return card;
+  }
+
+  function moveTemplate(templateId, direction){
+    var all = getAll();
+    var index = all.findIndex(function(t){ return t.id === templateId; });
+    var target = all[index + (direction === "up" ? -1 : 1)];
+    if(target){
+      try{
+        reorderTemplates(templateId, target.id, direction === "up" ? "before" : "after");
+        renderHome();
+      }catch(e){ toast("Could not reorder templates", e.message, "destructive"); }
+    }
+  }
+
+  function renderHome(){
+    var all = getAll();
+    var q = searchQuery.trim().toLowerCase();
+    var filtered = !q ? all : all.filter(function(t){
+      return t.title.toLowerCase().indexOf(q) !== -1 ||
+        t.content.toLowerCase().indexOf(q) !== -1 ||
+        t.info.toLowerCase().indexOf(q) !== -1 ||
+        t.time.toLowerCase().indexOf(q) !== -1;
+    });
+
+    templateGrid.innerHTML = "";
+    if(filtered.length === 0){
+      templateGrid.classList.add("hidden");
+      homeEmpty.classList.remove("hidden");
+    }else{
+      templateGrid.classList.remove("hidden");
+      homeEmpty.classList.add("hidden");
+      filtered.forEach(function(t){ templateGrid.appendChild(buildTemplateCard(t, all)); });
+    }
+  }
+
+  document.getElementById("searchInput").addEventListener("input", function(e){
+    searchQuery = e.target.value;
+    renderHome();
+  });
+
+  document.getElementById("btnExport").addEventListener("click", function(){
+    var text = serializeTemplates(getAll());
+    downloadTextFile(text, "flysend-wa-templates.txt");
+    toast("Templates exported", "Your templates were saved as a text file.");
+  });
+
+  var importFileInput = document.getElementById("importFileInput");
+  var btnImport = document.getElementById("btnImport");
+  var btnImportLabel = document.getElementById("btnImportLabel");
+  btnImport.addEventListener("click", function(){ importFileInput.click(); });
+  importFileInput.addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(!file) return;
+    btnImport.disabled = true;
+    btnImportLabel.textContent = "Importing...";
+    file.text().then(function(text){
+      try{
+        var count = importTemplatesFromText(text);
+        toast("Templates imported", count + (count === 1 ? " template was" : " templates were") + " added to your list.");
+        renderHome();
+      }catch(err){
+        toast("Import failed", err.message, "destructive");
+      }
+    }).catch(function(){
+      toast("Import failed", "Could not read that file.", "destructive");
+    }).finally(function(){
+      btnImport.disabled = false;
+      btnImportLabel.textContent = "Import";
+    });
+  });
+
+  // ================= Template form (Create / Edit shared) =================
+
+  var formMode = "create";
+  var formEditId = null;
+  var templateForm = document.getElementById("templateForm");
+  var formNotFound = document.getElementById("formNotFound");
+  var formHeaderTitle = document.getElementById("formHeaderTitle");
+  var formTitleDesc = document.getElementById("formTitleDesc");
+  var formContentDesc = document.getElementById("formContentDesc");
+  var formContentTooltip = document.getElementById("formContentTooltip");
+  var formSubmitLabel = document.getElementById("formSubmitLabel");
+  var errTitle = document.getElementById("errTitle");
+  var errContent = document.getElementById("errContent");
+
+  function renderForm(mode, id){
+    formMode = mode;
+    formEditId = id;
+    errTitle.classList.remove("show");
+    errContent.classList.remove("show");
+
+    if(mode === "create"){
+      formNotFound.classList.add("hidden");
+      templateForm.classList.remove("hidden");
+      formHeaderTitle.textContent = "New Template";
+      formSubmitLabel.textContent = "Save Template";
+      formTitleDesc.classList.remove("hidden");
+      formContentDesc.textContent = "Variables will become input fields when you use this template.";
+      formContentTooltip.classList.remove("hidden");
+      templateForm.reset();
+    }else{
+      var all = getAll();
+      var template = all.find(function(t){ return t.id === id; });
+      if(!template){
+        formNotFound.classList.remove("hidden");
+        templateForm.classList.add("hidden");
+        return;
+      }
+      formNotFound.classList.add("hidden");
+      templateForm.classList.remove("hidden");
+      formHeaderTitle.textContent = "Edit Template";
+      formSubmitLabel.textContent = "Update Template";
+      formTitleDesc.classList.add("hidden");
+      formContentDesc.textContent = "Variables: Use {{variable_name}} to create placeholders.";
+      formContentTooltip.classList.add("hidden");
+      templateForm.reset();
+      templateForm.elements["title"].value = template.title;
+      templateForm.elements["content"].value = template.content;
+      templateForm.elements["info"].value = template.info;
+      templateForm.elements["time"].value = template.time;
+    }
+  }
+
+  templateForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var titleVal = templateForm.elements["title"].value;
+    var contentVal = templateForm.elements["content"].value;
+    var valid = true;
+    if(titleVal.length === 0){ errTitle.classList.add("show"); valid = false; } else { errTitle.classList.remove("show"); }
+    if(contentVal.length === 0){ errContent.classList.add("show"); valid = false; } else { errContent.classList.remove("show"); }
+    if(!valid) return;
+
+    var data = {
+      title: titleVal,
+      content: contentVal,
+      info: templateForm.elements["info"].value,
+      time: templateForm.elements["time"].value
+    };
+    try{
+      if(formMode === "create"){
+        createTemplate(data);
+        toast("Template created", "Your new message template is ready to use.");
+      }else{
+        updateTemplateById(formEditId, data);
+        toast("Template updated", "Changes have been saved successfully.");
+      }
+      location.hash = "#/";
+    }catch(err){
+      toast("Error", err.message, "destructive");
+    }
+  });
+
+  // ================= Send view =================
+
+  var sendNotFound = document.getElementById("sendNotFound");
+  var sendContent = document.getElementById("sendContent");
+  var sendTitle = document.getElementById("sendTitle");
+  var sendMeta = document.getElementById("sendMeta");
+  var sendVariables = document.getElementById("sendVariables");
+  var sendPreview = document.getElementById("sendPreview");
+  var sendFooter = document.getElementById("sendFooter");
+
+  var currentSendTemplate = null;
+  var sendValues = {};
+  var currentFinalMessage = "";
+
+  function renderSend(id){
+    var all = getAll();
+    var template = all.find(function(t){ return t.id === id; });
+    if(!template){
+      sendNotFound.classList.remove("hidden");
+      sendContent.classList.add("hidden");
+      sendFooter.classList.add("hidden");
+      return;
+    }
+    sendNotFound.classList.add("hidden");
+    sendContent.classList.remove("hidden");
+    sendFooter.classList.remove("hidden");
+
+    currentSendTemplate = template;
+    sendValues = {};
+
+    sendTitle.textContent = template.title;
+    sendMeta.innerHTML = "";
+    if(template.info || template.time){
+      sendMeta.classList.remove("hidden");
+      if(template.info){
+        var s1 = document.createElement("span");
+        s1.textContent = template.info;
+        sendMeta.appendChild(s1);
+      }
+      if(template.info && template.time){
+        var sep = document.createElement("span");
+        sep.setAttribute("aria-hidden", "true");
+        sep.textContent = "\u00B7";
+        sendMeta.appendChild(sep);
+      }
+      if(template.time){
+        var s2 = document.createElement("span");
+        s2.className = "send-meta-time";
+        s2.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span></span>';
+        s2.querySelector("span").textContent = template.time;
+        sendMeta.appendChild(s2);
+      }
+    }else{
+      sendMeta.classList.add("hidden");
+    }
+
+    var matches = template.content.match(/{{(.*?)}}/g) || [];
+    var variables = Array.from(new Set(matches.map(function(m){ return m.replace(/{{|}}/g, ""); })));
+
+    sendVariables.innerHTML = "";
+    if(variables.length > 0){
+      sendVariables.classList.remove("hidden");
+      variables.forEach(function(v, idx){ sendVariables.appendChild(buildVariableInput(v, idx)); });
+    }else{
+      sendVariables.classList.add("hidden");
+    }
+
+    updateSendPreview(variables);
+  }
+
+  function buildVariableInput(name, index){
+    var isTimeVariable = name === "time";
+    var isDateVariable = name === "date";
+
+    var wrap = document.createElement("div");
+    wrap.className = "var-input-row";
+    wrap.style.animationDelay = (index * 0.08) + "s";
+
+    var label = document.createElement("label");
+    label.className = "var-label";
+    label.setAttribute("for", "var-" + name);
+    label.textContent = name.replace(/_/g, " ");
+    wrap.appendChild(label);
+
+    var inline = document.createElement("div");
+    inline.className = "var-input-inline";
+    var input = document.createElement("input");
+    input.id = "var-" + name;
+    input.className = "input-field";
+    input.placeholder = "Enter " + name + "...";
+    input.autocomplete = "off";
+    if(index === 0) input.autofocus = true;
+    input.addEventListener("input", function(){
+      sendValues[name] = input.value;
+      var matches = currentSendTemplate.content.match(/{{(.*?)}}/g) || [];
+      var variables = Array.from(new Set(matches.map(function(m){ return m.replace(/{{|}}/g, ""); })));
+      updateSendPreview(variables);
+    });
+    inline.appendChild(input);
+
+    if(isTimeVariable || isDateVariable){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "var-autofill-btn";
+      btn.title = isTimeVariable ? "Use current time" : "Use current date";
+      btn.setAttribute("aria-label", btn.title);
+      btn.innerHTML = isTimeVariable
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 7 12 12 15 14"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+      btn.addEventListener("click", function(){
+        var now = new Date();
+        var val;
+        if(isTimeVariable){
+          val = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+        }else{
+          val = String(now.getDate()).padStart(2, "0") + "." + String(now.getMonth() + 1).padStart(2, "0") + "." + String(now.getFullYear()).slice(-2).padStart(2, "0");
+        }
+        input.value = val;
+        sendValues[name] = val;
+        var matches2 = currentSendTemplate.content.match(/{{(.*?)}}/g) || [];
+        var variables2 = Array.from(new Set(matches2.map(function(m){ return m.replace(/{{|}}/g, ""); })));
+        updateSendPreview(variables2);
+      });
+      inline.appendChild(btn);
+    }
+
+    wrap.appendChild(inline);
+    return wrap;
+  }
+
+  function updateSendPreview(variables){
+    if(!currentSendTemplate) return;
+    var msg = currentSendTemplate.content;
+    variables.forEach(function(v){
+      var regex = new RegExp("{{" + v + "}}", "g");
+      msg = msg.replace(regex, sendValues[v] || ("[" + v + "]"));
+    });
+    currentFinalMessage = msg;
+
+    sendPreview.innerHTML = "";
+    msg.split(/(\[.*?\])/g).forEach(function(part){
+      if(part.charAt(0) === "[" && part.charAt(part.length - 1) === "]"){
+        var span = document.createElement("span");
+        span.className = "preview-placeholder";
+        span.textContent = part;
+        sendPreview.appendChild(span);
+      }else if(part){
+        sendPreview.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
+  var btnCopy = document.getElementById("btnCopy");
+  var copyLabel = document.getElementById("copyLabel");
+  var copyIcon = document.getElementById("copyIcon");
+  var copyResetTimer = null;
+
+  btnCopy.addEventListener("click", function(){
+    navigator.clipboard.writeText(currentFinalMessage).then(function(){
+      toast(null, "Message copied to clipboard");
+      btnCopy.classList.add("copied");
+      copyLabel.textContent = "Copied";
+      copyIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+      if(copyResetTimer) clearTimeout(copyResetTimer);
+      copyResetTimer = setTimeout(function(){
+        btnCopy.classList.remove("copied");
+        copyLabel.textContent = "Copy";
+        copyIcon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
+      }, 2000);
+    }).catch(function(){
+      toast(null, "Failed to copy", "destructive");
+    });
+  });
+
+  document.getElementById("btnWhatsApp").addEventListener("click", function(){
+    var url = "https://wa.me/?text=" + encodeURIComponent(currentFinalMessage);
+    window.open(url, "_blank");
+  });
+
+  // ================= Install prompt =================
+
+  var deferredPrompt = null;
+  var installPrompt = document.getElementById("installPrompt");
+
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    if(localStorage.getItem("pwa-install-dismissed")) return;
+    if(window.matchMedia("(display-mode: standalone)").matches) return;
+    installPrompt.classList.remove("hidden");
+  });
+
+  document.getElementById("installBtn").addEventListener("click", function(){
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(choice){
+      if(choice.outcome === "accepted") installPrompt.classList.add("hidden");
+      deferredPrompt = null;
+    });
+  });
+
+  document.getElementById("installDismiss").addEventListener("click", function(){
+    installPrompt.classList.add("hidden");
+    localStorage.setItem("pwa-install-dismissed", "true");
+  });
+
+  // ================= Init =================
+
+  render();
+})();
+</script>
+</body>
+</html>
