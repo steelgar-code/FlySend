@@ -1,1 +1,12 @@
-
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>FlySend</title></head><body>
+<script>
+(function () {
+  var parts = location.pathname.split("/").filter(Boolean);
+  var repoBase = parts.length ? "/" + parts[0] + "/" : "/";
+  var appPath = "/" + parts.slice(1).join("/");
+  sessionStorage.setItem("flysend-pages-redirect", appPath + location.search);
+  location.replace(repoBase);
+})();
+</script>
+</body></html>
