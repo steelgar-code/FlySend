@@ -9,29 +9,34 @@
     <meta name="apple-mobile-web-app-title" content="FlySend WA" />
     <meta name="description" content="Send repeated WhatsApp messages faster with templates" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <link rel="icon" type="image/png" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="manifest" href="./manifest.json" />
     <title>FlySend WA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      // GitHub Pages fallback: convert an old path-style URL such as /FlySend/edit/3
+      // into the hash route used by the static deployment.
+      (function () {
+        var redirect = sessionStorage.getItem("flysend-pages-redirect");
+        if (redirect) {
+          sessionStorage.removeItem("flysend-pages-redirect");
+          window.location.hash = redirect.charAt(0) === "/" ? redirect : "/" + redirect;
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./src/main.tsx"></script>
     <script>
-      // Remove older app-shell service workers so development and production
-      // always load the current client bundle. Template data remains in
-      // localStorage and is not affected by this cleanup.
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(registrations.map((registration) => registration.unregister()));
-          if ('caches' in window) {
-            const cacheNames = await caches.keys();
-            await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
-          }
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("./sw.js").catch(function (error) {
+            console.error("FlySend service worker registration failed:", error);
+          });
         });
       }
     </script>
