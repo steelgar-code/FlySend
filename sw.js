@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flysend-v2';
+const CACHE_NAME = 'flysend-v3';
 
 const ASSETS = [
   './',
