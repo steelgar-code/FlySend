@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flysend-v3';
+const CACHE_NAME = 'flysend-v4';
 
 const ASSETS = [
   './',
@@ -30,9 +30,26 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        // Update cache with the fresh network response
+        if (response.ok) {
+          const responseClone = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+
+        return response;
+      })
+      .catch(() => {
+        // Network unavailable → use cached version
+        return caches.match(event.request);
+      })
   );
 });
