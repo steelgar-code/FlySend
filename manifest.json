@@ -1,6 +1,7 @@
 {
   "short_name": "FlySend",
   "name": "FlySend - Direct WhatsApp Templates",
+  "description": "Send repeated WhatsApp messages faster with reusable templates.",
   "icons": [
     {
       "src": "icon-192.png",
