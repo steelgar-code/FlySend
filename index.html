@@ -353,6 +353,16 @@
   .install-prompt .btn-primary{width:100%;margin-top:16px;padding:10px;font-size:14px;}
   .install-prompt .btn-primary svg{width:16px;height:16px;}
 
+  /* ---------- Language switcher ---------- */
+  .topbar-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  @media (min-width:640px){ .topbar-controls{flex-wrap:nowrap;} }
+  .lang-select{
+    flex:0 0 auto;padding:8px 10px;border-radius:12px;background:hsl(var(--secondary) / .5);
+    border:2px solid transparent;color:hsl(var(--foreground));font-size:13px;
+    font-family:var(--font-body);cursor:pointer;outline:none;transition:all .2s;
+  }
+  .lang-select:focus{border-color:hsl(var(--primary));background:hsl(var(--background));}
+
   .spin{animation:spin 1s linear infinite;}
   @keyframes spin{ to{transform:rotate(360deg);} }
   .loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:256px;gap:16px;}
@@ -378,12 +388,19 @@
           <img src="icon-192.png" alt="FlySend WA">
           <div>
             <h1>FlySend WA</h1>
-            <p class="brand-tagline">Send repeated WhatsApp messages faster.</p>
+            <p class="brand-tagline" data-i18n="brandTagline">Send repeated WhatsApp messages faster.</p>
           </div>
         </div>
-        <div class="search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="searchInput" placeholder="Search templates...">
+        <div class="topbar-controls">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Search templates..." data-i18n-placeholder="searchPlaceholder">
+          </div>
+          <select class="lang-select" id="langSelectHome" data-i18n-aria-label="langSelectorAriaLabel" aria-label="Language">
+            <option value="en">English</option>
+            <option value="uk">Українська</option>
+            <option value="pt-BR">Português (BR)</option>
+          </select>
         </div>
       </div>
     </div>
@@ -396,31 +413,31 @@
       <div class="empty-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
-      <h3>No templates yet</h3>
-      <p>Create your first message template to get started. Use variables like <code>{{name}}</code> for dynamic content.</p>
+      <h3 data-i18n="emptyTitle">No templates yet</h3>
+      <p data-i18n-html="emptyDescHtml">Create your first message template to get started. Use variables like <code>{{name}}</code> for dynamic content.</p>
       <a href="#/create" class="btn-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Create Template
+        <span data-i18n="createTemplateBtn">Create Template</span>
       </a>
     </div>
 
     <div class="io-footer">
-      <p>Back up or add templates using a plain-text export file.</p>
+      <p data-i18n="footerDesc">Back up or add templates using a plain-text export file.</p>
       <div class="io-actions">
         <button type="button" id="btnExport" class="btn-secondary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export
+          <span data-i18n="exportBtn">Export</span>
         </button>
         <button type="button" id="btnImport" class="btn-secondary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <span id="btnImportLabel">Import</span>
+          <span id="btnImportLabel" data-i18n="importBtn">Import</span>
         </button>
-        <input type="file" id="importFileInput" accept=".txt,text/plain" class="hidden" aria-label="Import templates text file">
+        <input type="file" id="importFileInput" accept=".txt,text/plain" class="hidden" aria-label="Import templates text file" data-i18n-aria-label="importFileAriaLabel">
       </div>
     </div>
   </main>
 
-  <button type="button" id="fab" class="fab" aria-label="Create template">
+  <button type="button" id="fab" class="fab" aria-label="Create template" data-i18n-aria-label="fabAriaLabel">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 </section>
@@ -430,52 +447,57 @@
   <header class="page-header">
     <div class="page-header-inner max-w-2">
       <div class="page-header-left">
-        <a href="#/" class="back-btn" aria-label="Back">
+        <a href="#/" class="back-btn" aria-label="Back" data-i18n-aria-label="backAriaLabel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </a>
         <h1 id="formHeaderTitle">New Template</h1>
       </div>
+      <select class="lang-select" id="langSelectForm" data-i18n-aria-label="langSelectorAriaLabel" aria-label="Language">
+        <option value="en">English</option>
+        <option value="uk">Українська</option>
+        <option value="pt-BR">Português (BR)</option>
+      </select>
     </div>
   </header>
 
   <main class="form-main max-w-2">
     <div id="formNotFound" class="form-notfound hidden">
-      <h1>Template not found</h1>
-      <a href="#/">Go Home</a>
+      <h1 data-i18n="formNotFoundTitle">Template not found</h1>
+      <a href="#/" data-i18n="goHomeLink">Go Home</a>
     </div>
 
     <form id="templateForm" class="form-stack">
       <div class="field">
-        <label class="field-label" for="fieldTitle">Template Title</label>
-        <input id="fieldTitle" name="title" type="text" class="input-field field-title-input" placeholder="e.g., Order Confirmation" autocomplete="off">
-        <p class="field-desc" id="formTitleDesc">A short name to identify this template.</p>
-        <p class="field-error" id="errTitle">Title is required</p>
+        <label class="field-label" for="fieldTitle" data-i18n="fieldTitleLabel">Template Title</label>
+        <input id="fieldTitle" name="title" type="text" class="input-field field-title-input" placeholder="e.g., Order Confirmation" autocomplete="off" data-i18n-placeholder="fieldTitlePlaceholder">
+        <p class="field-desc" id="formTitleDesc" data-i18n="formTitleDesc">A short name to identify this template.</p>
+        <p class="field-error" id="errTitle" data-i18n="errTitleRequired">Title is required</p>
       </div>
 
       <div class="field">
         <div class="field-label-row">
-          <label class="field-label" for="fieldContent" style="margin-bottom:0;">Message Content</label>
+          <label class="field-label" for="fieldContent" style="margin-bottom:0;" data-i18n="fieldContentLabel">Message Content</label>
           <span class="var-tip" id="formContentTooltip" tabindex="0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            How to use variables
-            <span class="tip-pop">Wrap text in double curly braces to create a variable placeholder.<code>Hi {{name}}, your order {{order_id}} is ready!</code></span>
+            <span data-i18n="contentTooltipLabel">How to use variables</span>
+            <span class="tip-pop" data-i18n-html="contentTooltipPopHtml">Wrap text in double curly braces to create a variable placeholder.<code>Hi {{name}}, your order {{order_id}} is ready!</code></span>
           </span>
         </div>
-        <textarea id="fieldContent" name="content" class="input-field" placeholder="Hi {{name}}, just following up on..." style="margin-top:8px;"></textarea>
-        <p class="field-desc" id="formContentDesc">Variables will become input fields when you use this template.</p>
-        <p class="field-error" id="errContent">Content is required</p>
+        <textarea id="fieldContent" name="content" class="input-field" placeholder="Hi {{name}}, just following up on..." style="margin-top:8px;" data-i18n-placeholder="fieldContentPlaceholder"></textarea>
+        <p class="field-desc" id="formContentDesc" data-i18n="formContentDescCreate">Variables will become input fields when you use this template.</p>
+        <p class="field-error" id="errContent" data-i18n="errContentRequired">Content is required</p>
       </div>
 
       <div class="form-grid-2">
         <div class="field">
-          <label class="field-label" for="fieldInfo">Info</label>
-          <input id="fieldInfo" name="info" type="text" class="input-field" placeholder="e.g., For returning customers" autocomplete="off">
-          <p class="field-desc">Optional detail shown with the template.</p>
+          <label class="field-label" for="fieldInfo" data-i18n="fieldInfoLabel">Info</label>
+          <input id="fieldInfo" name="info" type="text" class="input-field" placeholder="e.g., For returning customers" autocomplete="off" data-i18n-placeholder="fieldInfoPlaceholder">
+          <p class="field-desc" data-i18n="fieldInfoDesc">Optional detail shown with the template.</p>
         </div>
         <div class="field">
-          <label class="field-label" for="fieldTime">Time</label>
-          <input id="fieldTime" name="time" type="text" class="input-field" placeholder="e.g., Weekdays at 9:00" autocomplete="off">
-          <p class="field-desc">Optional time information for regular messages.</p>
+          <label class="field-label" for="fieldTime" data-i18n="fieldTimeLabel">Time</label>
+          <input id="fieldTime" name="time" type="text" class="input-field" placeholder="e.g., Weekdays at 9:00" autocomplete="off" data-i18n-placeholder="fieldTimePlaceholder">
+          <p class="field-desc" data-i18n="fieldTimeDesc">Optional time information for regular messages.</p>
         </div>
       </div>
 
@@ -497,7 +519,7 @@
   <header class="page-header">
     <div class="page-header-inner max-w-2">
       <div class="page-header-left">
-        <a href="#/" class="back-btn" aria-label="Back">
+        <a href="#/" class="back-btn" aria-label="Back" data-i18n-aria-label="backAriaLabel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </a>
         <div style="overflow:hidden;">
@@ -505,12 +527,17 @@
           <div id="sendMeta" class="send-meta hidden"></div>
         </div>
       </div>
+      <select class="lang-select" id="langSelectSend" data-i18n-aria-label="langSelectorAriaLabel" aria-label="Language">
+        <option value="en">English</option>
+        <option value="uk">Українська</option>
+        <option value="pt-BR">Português (BR)</option>
+      </select>
     </div>
   </header>
 
   <div id="sendNotFound" class="form-notfound hidden">
-    <h1>Template not found</h1>
-    <a href="#/">Go Home</a>
+    <h1 data-i18n="formNotFoundTitle">Template not found</h1>
+    <a href="#/" data-i18n="goHomeLink">Go Home</a>
   </div>
 
   <main id="sendContent" class="send-main max-w-2">
@@ -518,7 +545,7 @@
       <div id="sendVariables" style="display:flex;flex-direction:column;gap:24px;"></div>
 
       <div>
-        <p class="preview-label">Preview</p>
+        <p class="preview-label" data-i18n="previewLabel">Preview</p>
         <div class="preview-card">
           <div class="deco-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
           <div id="sendPreview" class="preview-text"></div>
@@ -531,11 +558,11 @@
     <div class="send-footer-inner">
       <button type="button" id="btnCopy" class="send-copy-btn">
         <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        <span id="copyLabel">Copy</span>
+        <span id="copyLabel" data-i18n="copyLabel">Copy</span>
       </button>
       <button type="button" id="btnWhatsApp" class="send-whatsapp-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Send to WhatsApp
+        <span data-i18n="sendWhatsAppBtn">Send to WhatsApp</span>
       </button>
     </div>
   </div>
@@ -544,26 +571,26 @@
 <!-- ================= 404 ================= -->
 <section id="view-notfound" class="view hidden">
   <div class="form-notfound" style="min-height:100vh;">
-    <h1 style="font-size:26px;">404 — Page not found</h1>
-    <a href="#/" class="btn-primary" style="margin-top:8px;display:inline-flex;">Go Home</a>
+    <h1 style="font-size:26px;" data-i18n="notFound404Title">404 — Page not found</h1>
+    <a href="#/" class="btn-primary" style="margin-top:8px;display:inline-flex;" data-i18n="goHomeLink">Go Home</a>
   </div>
 </section>
 
 <!-- ================= Install prompt ================= -->
 <div id="installPrompt" class="install-prompt hidden">
-  <button type="button" id="installDismiss" class="install-close" aria-label="Dismiss">
+  <button type="button" id="installDismiss" class="install-close" aria-label="Dismiss" data-i18n-aria-label="installDismissAriaLabel">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <div class="install-row">
     <img src="icon-192.png" alt="FlySend WA">
     <div>
-      <h3>Install FlySend WA</h3>
-      <p>Add to home screen for quick access</p>
+      <h3 data-i18n="installTitle">Install FlySend WA</h3>
+      <p data-i18n="installDesc">Add to home screen for quick access</p>
     </div>
   </div>
   <button type="button" id="installBtn" class="btn-primary">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Install App
+    <span data-i18n="installBtnLabel">Install App</span>
   </button>
 </div>
 
@@ -573,6 +600,353 @@
 
   var STORAGE_KEY = "whatsapp-templates";
   var EXPORT_HEADER = "# FlySend WA Templates\n# Plain text export - each template is imported as a new template\n\n";
+
+  // ================= i18n =================
+  // Language preference lives under its own storage key, entirely separate from
+  // STORAGE_KEY above, so switching languages never touches saved templates.
+  var LANG_KEY = "flysend-lang";
+
+  var translations = {
+    en: {
+      brandTagline: "Send repeated WhatsApp messages faster.",
+      searchPlaceholder: "Search templates...",
+      emptyTitle: "No templates yet",
+      emptyDescHtml: "Create your first message template to get started. Use variables like <code>{{name}}</code> for dynamic content.",
+      createTemplateBtn: "Create Template",
+      footerDesc: "Back up or add templates using a plain-text export file.",
+      exportBtn: "Export",
+      importBtn: "Import",
+      importingBtn: "Importing...",
+      importFileAriaLabel: "Import templates text file",
+      fabAriaLabel: "Create template",
+      backAriaLabel: "Back",
+      formNewTitle: "New Template",
+      formEditTitle: "Edit Template",
+      formNotFoundTitle: "Template not found",
+      goHomeLink: "Go Home",
+      fieldTitleLabel: "Template Title",
+      fieldTitlePlaceholder: "e.g., Order Confirmation",
+      formTitleDesc: "A short name to identify this template.",
+      errTitleRequired: "Title is required",
+      fieldContentLabel: "Message Content",
+      contentTooltipLabel: "How to use variables",
+      contentTooltipPopHtml: "Wrap text in double curly braces to create a variable placeholder.<code>Hi {{name}}, your order {{order_id}} is ready!</code>",
+      fieldContentPlaceholder: "Hi {{name}}, just following up on...",
+      formContentDescCreate: "Variables will become input fields when you use this template.",
+      formContentDescEdit: "Variables: Use {{variable_name}} to create placeholders.",
+      errContentRequired: "Content is required",
+      fieldInfoLabel: "Info",
+      fieldInfoPlaceholder: "e.g., For returning customers",
+      fieldInfoDesc: "Optional detail shown with the template.",
+      fieldTimeLabel: "Time",
+      fieldTimePlaceholder: "e.g., Weekdays at 9:00",
+      fieldTimeDesc: "Optional time information for regular messages.",
+      formSubmitSave: "Save Template",
+      formSubmitUpdate: "Update Template",
+      previewLabel: "Preview",
+      copyLabel: "Copy",
+      copyLabelCopied: "Copied",
+      sendWhatsAppBtn: "Send to WhatsApp",
+      notFound404Title: "404 — Page not found",
+      installTitle: "Install FlySend WA",
+      installDesc: "Add to home screen for quick access",
+      installBtnLabel: "Install App",
+      installDismissAriaLabel: "Dismiss",
+      langSelectorAriaLabel: "Language",
+
+      toastReorderErrorTitle: "Could not reorder templates",
+      moveUpAriaLabel: "Move {title} up",
+      moveDownAriaLabel: "Move {title} down",
+      deleteConfirm: "Delete \"{title}\"? This will permanently delete it. This action cannot be undone.",
+      toastTemplateDeletedTitle: "Template deleted",
+      toastTemplateDeletedDesc: "The template has been removed.",
+      toastErrorTitle: "Error",
+      useTemplateBtn: "Use Template",
+      badgeStatic: "Static message",
+      badgeVariable_one: "{n} variable",
+      badgeVariable_other: "{n} variables",
+      toastTemplatesExportedTitle: "Templates exported",
+      toastTemplatesExportedDesc: "Your templates were saved as a text file.",
+      toastImportedTitle: "Templates imported",
+      toastImportedDesc_one: "{n} template was added to your list.",
+      toastImportedDesc_other: "{n} templates were added to your list.",
+      toastImportFailedTitle: "Import failed",
+      toastImportFailedReadDesc: "Could not read that file.",
+      toastTemplateCreatedTitle: "Template created",
+      toastTemplateCreatedDesc: "Your new message template is ready to use.",
+      toastTemplateUpdatedTitle: "Template updated",
+      toastTemplateUpdatedDesc: "Changes have been saved successfully.",
+      enterVariablePlaceholder: "Enter {name}...",
+      useCurrentTimeTitle: "Use current time",
+      useCurrentDateTitle: "Use current date",
+      toastCopiedDesc: "Message copied to clipboard",
+      toastCopyFailedDesc: "Failed to copy",
+      errNoTemplateBlocks: "No template blocks found. Choose a FlySend WA text export.",
+      errTemplateMissingContent: "Template {n} is missing its Content section.",
+      errTemplateMissingTitleField: "Template {n} is missing a Title."
+    },
+    uk: {
+      brandTagline: "Надсилайте повторювані повідомлення WhatsApp швидше.",
+      searchPlaceholder: "Пошук шаблонів...",
+      emptyTitle: "Поки немає шаблонів",
+      emptyDescHtml: "Створіть свій перший шаблон повідомлення, щоб почати. Використовуйте змінні на кшталт <code>{{name}}</code> для динамічного вмісту.",
+      createTemplateBtn: "Створити шаблон",
+      footerDesc: "Створюйте резервну копію або додавайте шаблони за допомогою текстового файлу експорту.",
+      exportBtn: "Експорт",
+      importBtn: "Імпорт",
+      importingBtn: "Імпортування...",
+      importFileAriaLabel: "Імпортувати текстовий файл шаблонів",
+      fabAriaLabel: "Створити шаблон",
+      backAriaLabel: "Назад",
+      formNewTitle: "Новий шаблон",
+      formEditTitle: "Редагувати шаблон",
+      formNotFoundTitle: "Шаблон не знайдено",
+      goHomeLink: "На головну",
+      fieldTitleLabel: "Назва шаблону",
+      fieldTitlePlaceholder: "напр., Підтвердження замовлення",
+      formTitleDesc: "Коротка назва для ідентифікації цього шаблону.",
+      errTitleRequired: "Назва обов'язкова",
+      fieldContentLabel: "Текст повідомлення",
+      contentTooltipLabel: "Як використовувати змінні",
+      contentTooltipPopHtml: "Обгорніть текст подвійними фігурними дужками, щоб створити змінну.<code>Привіт, {{name}}, ваше замовлення {{order_id}} готове!</code>",
+      fieldContentPlaceholder: "Привіт, {{name}}, просто нагадую щодо...",
+      formContentDescCreate: "Змінні стануть полями введення під час використання цього шаблону.",
+      formContentDescEdit: "Змінні: використовуйте {{variable_name}} для створення заповнювачів.",
+      errContentRequired: "Текст обов'язковий",
+      fieldInfoLabel: "Інформація",
+      fieldInfoPlaceholder: "напр., Для постійних клієнтів",
+      fieldInfoDesc: "Необов'язкова деталь, що відображається з шаблоном.",
+      fieldTimeLabel: "Час",
+      fieldTimePlaceholder: "напр., Будні дні о 9:00",
+      fieldTimeDesc: "Необов'язкова інформація про час для регулярних повідомлень.",
+      formSubmitSave: "Зберегти шаблон",
+      formSubmitUpdate: "Оновити шаблон",
+      previewLabel: "Перегляд",
+      copyLabel: "Копіювати",
+      copyLabelCopied: "Скопійовано",
+      sendWhatsAppBtn: "Надіслати у WhatsApp",
+      notFound404Title: "404 — Сторінку не знайдено",
+      installTitle: "Встановити FlySend WA",
+      installDesc: "Додайте на головний екран для швидкого доступу",
+      installBtnLabel: "Встановити застосунок",
+      installDismissAriaLabel: "Закрити",
+      langSelectorAriaLabel: "Мова",
+
+      toastReorderErrorTitle: "Не вдалося змінити порядок шаблонів",
+      moveUpAriaLabel: "Перемістити {title} вгору",
+      moveDownAriaLabel: "Перемістити {title} вниз",
+      deleteConfirm: "Видалити «{title}»? Це остаточно видалить шаблон. Цю дію неможливо скасувати.",
+      toastTemplateDeletedTitle: "Шаблон видалено",
+      toastTemplateDeletedDesc: "Шаблон було видалено.",
+      toastErrorTitle: "Помилка",
+      useTemplateBtn: "Використати шаблон",
+      badgeStatic: "Статичне повідомлення",
+      badgeVariable_one: "{n} змінна",
+      badgeVariable_few: "{n} змінні",
+      badgeVariable_many: "{n} змінних",
+      badgeVariable_other: "{n} змінних",
+      toastTemplatesExportedTitle: "Шаблони експортовано",
+      toastTemplatesExportedDesc: "Ваші шаблони збережено як текстовий файл.",
+      toastImportedTitle: "Шаблони імпортовано",
+      toastImportedDesc_one: "{n} шаблон додано до вашого списку.",
+      toastImportedDesc_few: "{n} шаблони додано до вашого списку.",
+      toastImportedDesc_many: "{n} шаблонів додано до вашого списку.",
+      toastImportedDesc_other: "{n} шаблонів додано до вашого списку.",
+      toastImportFailedTitle: "Помилка імпорту",
+      toastImportFailedReadDesc: "Не вдалося прочитати файл.",
+      toastTemplateCreatedTitle: "Шаблон створено",
+      toastTemplateCreatedDesc: "Ваш новий шаблон повідомлення готовий до використання.",
+      toastTemplateUpdatedTitle: "Шаблон оновлено",
+      toastTemplateUpdatedDesc: "Зміни успішно збережено.",
+      enterVariablePlaceholder: "Введіть {name}...",
+      useCurrentTimeTitle: "Використати поточний час",
+      useCurrentDateTitle: "Використати поточну дату",
+      toastCopiedDesc: "Повідомлення скопійовано в буфер обміну",
+      toastCopyFailedDesc: "Не вдалося скопіювати",
+      errNoTemplateBlocks: "Блоків шаблонів не знайдено. Виберіть файл експорту FlySend WA.",
+      errTemplateMissingContent: "У шаблоні {n} відсутній розділ Content.",
+      errTemplateMissingTitleField: "У шаблоні {n} відсутня назва (Title)."
+    },
+    "pt-BR": {
+      brandTagline: "Envie mensagens repetidas do WhatsApp mais rápido.",
+      searchPlaceholder: "Buscar modelos...",
+      emptyTitle: "Nenhum modelo ainda",
+      emptyDescHtml: "Crie seu primeiro modelo de mensagem para começar. Use variáveis como <code>{{name}}</code> para conteúdo dinâmico.",
+      createTemplateBtn: "Criar modelo",
+      footerDesc: "Faça backup ou adicione modelos usando um arquivo de exportação em texto simples.",
+      exportBtn: "Exportar",
+      importBtn: "Importar",
+      importingBtn: "Importando...",
+      importFileAriaLabel: "Importar arquivo de texto de modelos",
+      fabAriaLabel: "Criar modelo",
+      backAriaLabel: "Voltar",
+      formNewTitle: "Novo modelo",
+      formEditTitle: "Editar modelo",
+      formNotFoundTitle: "Modelo não encontrado",
+      goHomeLink: "Ir para o início",
+      fieldTitleLabel: "Título do modelo",
+      fieldTitlePlaceholder: "ex.: Confirmação de pedido",
+      formTitleDesc: "Um nome curto para identificar este modelo.",
+      errTitleRequired: "O título é obrigatório",
+      fieldContentLabel: "Conteúdo da mensagem",
+      contentTooltipLabel: "Como usar variáveis",
+      contentTooltipPopHtml: "Envolva o texto em chaves duplas para criar um espaço reservado de variável.<code>Olá {{name}}, seu pedido {{order_id}} está pronto!</code>",
+      fieldContentPlaceholder: "Olá {{name}}, só passando para...",
+      formContentDescCreate: "As variáveis se tornarão campos de entrada ao usar este modelo.",
+      formContentDescEdit: "Variáveis: use {{variable_name}} para criar espaços reservados.",
+      errContentRequired: "O conteúdo é obrigatório",
+      fieldInfoLabel: "Informação",
+      fieldInfoPlaceholder: "ex.: Para clientes recorrentes",
+      fieldInfoDesc: "Detalhe opcional exibido com o modelo.",
+      fieldTimeLabel: "Horário",
+      fieldTimePlaceholder: "ex.: Dias úteis às 9h",
+      fieldTimeDesc: "Informação de horário opcional para mensagens regulares.",
+      formSubmitSave: "Salvar modelo",
+      formSubmitUpdate: "Atualizar modelo",
+      previewLabel: "Pré-visualização",
+      copyLabel: "Copiar",
+      copyLabelCopied: "Copiado",
+      sendWhatsAppBtn: "Enviar para o WhatsApp",
+      notFound404Title: "404 — Página não encontrada",
+      installTitle: "Instalar FlySend WA",
+      installDesc: "Adicione à tela inicial para acesso rápido",
+      installBtnLabel: "Instalar aplicativo",
+      installDismissAriaLabel: "Dispensar",
+      langSelectorAriaLabel: "Idioma",
+
+      toastReorderErrorTitle: "Não foi possível reordenar os modelos",
+      moveUpAriaLabel: "Mover {title} para cima",
+      moveDownAriaLabel: "Mover {title} para baixo",
+      deleteConfirm: "Excluir \"{title}\"? Isso excluirá permanentemente o modelo. Esta ação não pode ser desfeita.",
+      toastTemplateDeletedTitle: "Modelo excluído",
+      toastTemplateDeletedDesc: "O modelo foi removido.",
+      toastErrorTitle: "Erro",
+      useTemplateBtn: "Usar modelo",
+      badgeStatic: "Mensagem estática",
+      badgeVariable_one: "{n} variável",
+      badgeVariable_other: "{n} variáveis",
+      toastTemplatesExportedTitle: "Modelos exportados",
+      toastTemplatesExportedDesc: "Seus modelos foram salvos como um arquivo de texto.",
+      toastImportedTitle: "Modelos importados",
+      toastImportedDesc_one: "{n} modelo foi adicionado à sua lista.",
+      toastImportedDesc_other: "{n} modelos foram adicionados à sua lista.",
+      toastImportFailedTitle: "Falha na importação",
+      toastImportFailedReadDesc: "Não foi possível ler o arquivo.",
+      toastTemplateCreatedTitle: "Modelo criado",
+      toastTemplateCreatedDesc: "Seu novo modelo de mensagem está pronto para uso.",
+      toastTemplateUpdatedTitle: "Modelo atualizado",
+      toastTemplateUpdatedDesc: "As alterações foram salvas com sucesso.",
+      enterVariablePlaceholder: "Digite {name}...",
+      useCurrentTimeTitle: "Usar hora atual",
+      useCurrentDateTitle: "Usar data atual",
+      toastCopiedDesc: "Mensagem copiada para a área de transferência",
+      toastCopyFailedDesc: "Falha ao copiar",
+      errNoTemplateBlocks: "Nenhum bloco de modelo encontrado. Escolha um arquivo de exportação do FlySend WA.",
+      errTemplateMissingContent: "O modelo {n} está sem a seção Content.",
+      errTemplateMissingTitleField: "O modelo {n} está sem um Title."
+    }
+  };
+
+  function detectDefaultLang(){
+    try{
+      var saved = localStorage.getItem(LANG_KEY);
+      if(saved && translations[saved]) return saved;
+    }catch(e){}
+    var nav = ((navigator.language || navigator.userLanguage || "en") + "").toLowerCase();
+    if(nav.indexOf("uk") === 0) return "uk";
+    if(nav.indexOf("pt") === 0) return "pt-BR";
+    return "en";
+  }
+
+  var currentLang = detectDefaultLang();
+
+  function interpolate(str, vars){
+    if(!vars) return str;
+    return String(str).replace(/\{(\w+)\}/g, function(_, k){
+      return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : "";
+    });
+  }
+
+  function t(key, vars){
+    var dict = translations[currentLang] || translations.en;
+    var str = dict[key] !== undefined ? dict[key] : (translations.en[key] !== undefined ? translations.en[key] : key);
+    return interpolate(str, vars);
+  }
+
+  function pluralFormFor(n, lang){
+    if(lang === "uk"){
+      var mod10 = n % 10, mod100 = n % 100;
+      if(mod10 === 1 && mod100 !== 11) return "one";
+      if(mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "few";
+      return "many";
+    }
+    return n === 1 ? "one" : "other";
+  }
+
+  function tCount(base, n, vars){
+    vars = vars ? Object.assign({}, vars) : {};
+    vars.n = n;
+    var dict = translations[currentLang] || translations.en;
+    var form = pluralFormFor(n, currentLang);
+    var str = dict[base + "_" + form] || dict[base + "_other"] ||
+      translations.en[base + "_" + form] || translations.en[base + "_other"];
+    return interpolate(str, vars);
+  }
+
+  function applyStaticTranslations(){
+    document.documentElement.setAttribute("lang", currentLang);
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      el.textContent = t(el.getAttribute("data-i18n"));
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach(function(el){
+      el.innerHTML = t(el.getAttribute("data-i18n-html"));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el){
+      el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
+    });
+    document.querySelectorAll("[data-i18n-aria-label]").forEach(function(el){
+      el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria-label")));
+    });
+  }
+
+  function syncLangSelects(){
+    document.querySelectorAll(".lang-select").forEach(function(sel){ sel.value = currentLang; });
+  }
+
+  function updateFormModeLabels(){
+    if(formMode === "edit"){
+      formHeaderTitle.textContent = t("formEditTitle");
+      formSubmitLabel.textContent = t("formSubmitUpdate");
+      formTitleDesc.classList.add("hidden");
+      formContentDesc.textContent = t("formContentDescEdit");
+      formContentTooltip.classList.add("hidden");
+    }else{
+      formHeaderTitle.textContent = t("formNewTitle");
+      formSubmitLabel.textContent = t("formSubmitSave");
+      formTitleDesc.classList.remove("hidden");
+      formContentDesc.textContent = t("formContentDescCreate");
+      formContentTooltip.classList.remove("hidden");
+    }
+  }
+
+  // Update only what can change without discarding in-progress user input:
+  // static text everywhere, home view (rebuilding it is harmless), and the
+  // form's mode-dependent labels (without resetting field values). The send
+  // view's variable inputs are updated in place further down.
+  function setLang(lang){
+    if(!translations[lang]) lang = "en";
+    currentLang = lang;
+    try{ localStorage.setItem(LANG_KEY, lang); }catch(e){}
+    applyStaticTranslations();
+    syncLangSelects();
+    if(document.getElementById("templateForm")) updateFormModeLabels();
+    if(typeof renderHome === "function" && !document.getElementById("view-home").classList.contains("hidden")) renderHome();
+    if(typeof updateSendVariableTexts === "function") updateSendVariableTexts();
+  }
+
+  document.querySelectorAll(".lang-select").forEach(function(sel){
+    sel.addEventListener("change", function(){ setLang(sel.value); });
+  });
 
   // ================= Data layer (ported 1:1 from use-templates.ts) =================
 
@@ -601,13 +975,13 @@
   function parseTemplates(text){
     var blocks = Array.from(text.matchAll(/^\[TEMPLATE\]\r?\n([\s\S]*?)^\[\/TEMPLATE\]\s*$/gm));
     if(blocks.length === 0){
-      throw new Error("No template blocks found. Choose a FlySend WA text export.");
+      throw new Error(t("errNoTemplateBlocks"));
     }
     return blocks.map(function(match, index){
       var block = match[1].replace(/^\r?\n/, "");
       var contentMarker = block.match(/(?:^|\r?\n)Content:\r?\n/);
       if(!contentMarker || contentMarker.index === undefined){
-        throw new Error("Template " + (index + 1) + " is missing its Content section.");
+        throw new Error(t("errTemplateMissingContent", { n: index + 1 }));
       }
       var metadata = block.slice(0, contentMarker.index);
       var contentStart = contentMarker.index + contentMarker[0].length;
@@ -618,7 +992,7 @@
       var titleMatch = metadata.match(/(?:^|\r?\n)Title:\s*(.*)/);
       var title = titleMatch && titleMatch[1] ? titleMatch[1].trim() : "";
       if(!title){
-        throw new Error("Template " + (index + 1) + " is missing a Title.");
+        throw new Error(t("errTemplateMissingTitleField", { n: index + 1 }));
       }
       var infoMatch = metadata.match(/(?:^|\r?\n)Info:\s*(.*)/);
       var timeMatch = metadata.match(/(?:^|\r?\n)Time:\s*(.*)/);
@@ -695,7 +1069,7 @@
 
   function updateTemplateById(id, updates){
     var idx = templates.findIndex(function(t){ return t.id === id; });
-    if(idx === -1) throw new Error("Template not found");
+    if(idx === -1) throw new Error(t("formNotFoundTitle"));
     var merged = {};
     for(var k in templates[idx]){ merged[k] = templates[idx][k]; }
     for(var k2 in updates){ merged[k2] = updates[k2]; }
@@ -707,7 +1081,7 @@
   function deleteTemplateById(id){
     var before = templates.length;
     templates = templates.filter(function(t){ return t.id !== id; });
-    if(templates.length === before) throw new Error("Template not found");
+    if(templates.length === before) throw new Error(t("formNotFoundTitle"));
     saveTemplatesToStorage(templates);
   }
 
@@ -716,7 +1090,7 @@
     var ordered = getAll();
     var sourceIndex = ordered.findIndex(function(t){ return t.id === sourceId; });
     var targetIndex = ordered.findIndex(function(t){ return t.id === targetId; });
-    if(sourceIndex === -1 || targetIndex === -1) throw new Error("Template not found");
+    if(sourceIndex === -1 || targetIndex === -1) throw new Error(t("formNotFoundTitle"));
     var source = ordered.splice(sourceIndex, 1)[0];
     var nextTargetIndex = ordered.findIndex(function(t){ return t.id === targetId; });
     ordered.splice(position === "after" ? nextTargetIndex + 1 : nextTargetIndex, 0, source);
@@ -835,7 +1209,7 @@
     card.addEventListener("drop", function(){
       if(draggedId !== null && draggedId !== template.id){
         try{ reorderTemplates(draggedId, template.id); renderHome(); }
-        catch(e){ toast("Could not reorder templates", e.message, "destructive"); }
+        catch(e){ toast(t("toastReorderErrorTitle"), e.message, "destructive"); }
       }
       draggedId = null;
     });
@@ -871,10 +1245,10 @@
     var badge = document.createElement("span");
     if(variables > 0){
       badge.className = "tc-badge has-vars";
-      badge.textContent = variables + (variables === 1 ? " variable" : " variables");
+      badge.textContent = tCount("badgeVariable", variables);
     }else{
       badge.className = "tc-badge no-vars";
-      badge.textContent = "Static message";
+      badge.textContent = t("badgeStatic");
     }
     badgeRow.appendChild(badge);
     titleWrap.appendChild(badgeRow);
@@ -886,12 +1260,12 @@
     var upBtn = document.createElement("button");
     upBtn.type = "button"; upBtn.className = "icon-btn"; upBtn.innerHTML = iconMove("up");
     upBtn.disabled = !canMoveUp;
-    upBtn.setAttribute("aria-label", "Move " + template.title + " up");
+    upBtn.setAttribute("aria-label", t("moveUpAriaLabel", { title: template.title }));
     upBtn.addEventListener("click", function(){ moveTemplate(template.id, "up"); });
     var downBtn = document.createElement("button");
     downBtn.type = "button"; downBtn.className = "icon-btn"; downBtn.innerHTML = iconMove("down");
     downBtn.disabled = !canMoveDown;
-    downBtn.setAttribute("aria-label", "Move " + template.title + " down");
+    downBtn.setAttribute("aria-label", t("moveDownAriaLabel", { title: template.title }));
     downBtn.addEventListener("click", function(){ moveTemplate(template.id, "down"); });
     var editLink = document.createElement("a");
     editLink.className = "icon-btn"; editLink.href = "#/edit/" + template.id;
@@ -900,9 +1274,9 @@
     delBtn.type = "button"; delBtn.className = "icon-btn danger";
     delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
     delBtn.addEventListener("click", function(){
-      if(confirm("Delete \"" + template.title + "\"? This will permanently delete it. This action cannot be undone.")){
-        try{ deleteTemplateById(template.id); toast("Template deleted", "The template has been removed."); renderHome(); }
-        catch(e){ toast("Error", e.message, "destructive"); }
+      if(confirm(t("deleteConfirm", { title: template.title }))){
+        try{ deleteTemplateById(template.id); toast(t("toastTemplateDeletedTitle"), t("toastTemplateDeletedDesc")); renderHome(); }
+        catch(e){ toast(t("toastErrorTitle"), e.message, "destructive"); }
       }
     });
     actions.appendChild(upBtn); actions.appendChild(downBtn); actions.appendChild(editLink); actions.appendChild(delBtn);
@@ -919,7 +1293,7 @@
     useBtn.className = "tc-use-btn";
     useBtn.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
-      "Use Template" +
+      t("useTemplateBtn") +
       '<svg class="tc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
     card.appendChild(useBtn);
 
@@ -934,7 +1308,7 @@
       try{
         reorderTemplates(templateId, target.id, direction === "up" ? "before" : "after");
         renderHome();
-      }catch(e){ toast("Could not reorder templates", e.message, "destructive"); }
+      }catch(e){ toast(t("toastReorderErrorTitle"), e.message, "destructive"); }
     }
   }
 
@@ -967,7 +1341,7 @@
   document.getElementById("btnExport").addEventListener("click", function(){
     var text = serializeTemplates(getAll());
     downloadTextFile(text, "flysend-wa-templates.txt");
-    toast("Templates exported", "Your templates were saved as a text file.");
+    toast(t("toastTemplatesExportedTitle"), t("toastTemplatesExportedDesc"));
   });
 
   var importFileInput = document.getElementById("importFileInput");
@@ -979,20 +1353,20 @@
     e.target.value = "";
     if(!file) return;
     btnImport.disabled = true;
-    btnImportLabel.textContent = "Importing...";
+    btnImportLabel.textContent = t("importingBtn");
     file.text().then(function(text){
       try{
         var count = importTemplatesFromText(text);
-        toast("Templates imported", count + (count === 1 ? " template was" : " templates were") + " added to your list.");
+        toast(t("toastImportedTitle"), tCount("toastImportedDesc", count));
         renderHome();
       }catch(err){
-        toast("Import failed", err.message, "destructive");
+        toast(t("toastImportFailedTitle"), err.message, "destructive");
       }
     }).catch(function(){
-      toast("Import failed", "Could not read that file.", "destructive");
+      toast(t("toastImportFailedTitle"), t("toastImportFailedReadDesc"), "destructive");
     }).finally(function(){
       btnImport.disabled = false;
-      btnImportLabel.textContent = "Import";
+      btnImportLabel.textContent = t("importBtn");
     });
   });
 
@@ -1023,11 +1397,7 @@ document.getElementById("fab").addEventListener("click", function(){
     if(mode === "create"){
       formNotFound.classList.add("hidden");
       templateForm.classList.remove("hidden");
-      formHeaderTitle.textContent = "New Template";
-      formSubmitLabel.textContent = "Save Template";
-      formTitleDesc.classList.remove("hidden");
-      formContentDesc.textContent = "Variables will become input fields when you use this template.";
-      formContentTooltip.classList.remove("hidden");
+      updateFormModeLabels();
       templateForm.reset();
     }else{
       var all = getAll();
@@ -1039,11 +1409,7 @@ document.getElementById("fab").addEventListener("click", function(){
       }
       formNotFound.classList.add("hidden");
       templateForm.classList.remove("hidden");
-      formHeaderTitle.textContent = "Edit Template";
-      formSubmitLabel.textContent = "Update Template";
-      formTitleDesc.classList.add("hidden");
-      formContentDesc.textContent = "Variables: Use {{variable_name}} to create placeholders.";
-      formContentTooltip.classList.add("hidden");
+      updateFormModeLabels();
       templateForm.reset();
       templateForm.elements["title"].value = template.title;
       templateForm.elements["content"].value = template.content;
@@ -1070,14 +1436,14 @@ document.getElementById("fab").addEventListener("click", function(){
     try{
       if(formMode === "create"){
         createTemplate(data);
-        toast("Template created", "Your new message template is ready to use.");
+        toast(t("toastTemplateCreatedTitle"), t("toastTemplateCreatedDesc"));
       }else{
         updateTemplateById(formEditId, data);
-        toast("Template updated", "Changes have been saved successfully.");
+        toast(t("toastTemplateUpdatedTitle"), t("toastTemplateUpdatedDesc"));
       }
       location.hash = "#/";
     }catch(err){
-      toast("Error", err.message, "destructive");
+      toast(t("toastErrorTitle"), err.message, "destructive");
     }
   });
 
@@ -1170,7 +1536,8 @@ document.getElementById("fab").addEventListener("click", function(){
     var input = document.createElement("input");
     input.id = "var-" + name;
     input.className = "input-field";
-    input.placeholder = "Enter " + name + "...";
+    input.placeholder = t("enterVariablePlaceholder", { name: name });
+    input.setAttribute("data-var-name", name);
     input.autocomplete = "off";
     if(index === 0) input.autofocus = true;
     input.addEventListener("input", function(){
@@ -1185,7 +1552,8 @@ document.getElementById("fab").addEventListener("click", function(){
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "var-autofill-btn";
-      btn.title = isTimeVariable ? "Use current time" : "Use current date";
+      btn.setAttribute("data-var-kind", isTimeVariable ? "time" : "date");
+      btn.title = isTimeVariable ? t("useCurrentTimeTitle") : t("useCurrentDateTitle");
       btn.setAttribute("aria-label", btn.title);
       btn.innerHTML = isTimeVariable
         ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 7 12 12 15 14"/></svg>'
@@ -1209,6 +1577,20 @@ document.getElementById("fab").addEventListener("click", function(){
 
     wrap.appendChild(inline);
     return wrap;
+  }
+
+  // Update the send view's variable placeholders/tooltips in place on a
+  // language switch, without rebuilding the inputs — so any values the user
+  // already typed for this send are preserved.
+  function updateSendVariableTexts(){
+    document.querySelectorAll("#sendVariables input[data-var-name]").forEach(function(input){
+      input.placeholder = t("enterVariablePlaceholder", { name: input.getAttribute("data-var-name") });
+    });
+    document.querySelectorAll("#sendVariables .var-autofill-btn[data-var-kind]").forEach(function(btn){
+      var label = btn.getAttribute("data-var-kind") === "time" ? t("useCurrentTimeTitle") : t("useCurrentDateTitle");
+      btn.title = label;
+      btn.setAttribute("aria-label", label);
+    });
   }
 
   function updateSendPreview(variables){
@@ -1240,18 +1622,18 @@ document.getElementById("fab").addEventListener("click", function(){
 
   btnCopy.addEventListener("click", function(){
     navigator.clipboard.writeText(currentFinalMessage).then(function(){
-      toast(null, "Message copied to clipboard");
+      toast(null, t("toastCopiedDesc"));
       btnCopy.classList.add("copied");
-      copyLabel.textContent = "Copied";
+      copyLabel.textContent = t("copyLabelCopied");
       copyIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
       if(copyResetTimer) clearTimeout(copyResetTimer);
       copyResetTimer = setTimeout(function(){
         btnCopy.classList.remove("copied");
-        copyLabel.textContent = "Copy";
+        copyLabel.textContent = t("copyLabel");
         copyIcon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
       }, 2000);
     }).catch(function(){
-      toast(null, "Failed to copy", "destructive");
+      toast(null, t("toastCopyFailedDesc"), "destructive");
     });
   });
 
@@ -1288,6 +1670,9 @@ document.getElementById("fab").addEventListener("click", function(){
   });
 
   // ================= Init =================
+  applyStaticTranslations();
+  syncLangSelects();
+  updateFormModeLabels();
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker.register("./sw.js")
