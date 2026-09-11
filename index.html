@@ -240,6 +240,28 @@
   textarea.input-field{min-height:200px;resize:none;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:15px;}
   .field-title-input{font-size:18px;font-weight:500;}
   .form-grid-2{display:grid;gap:32px;}
+
+  /* ---------- Category combobox ---------- */
+  .combobox{position:relative;}
+  .combobox .input-field{padding-right:44px;}
+  .combobox-toggle{
+    position:absolute;right:6px;top:6px;width:34px;height:34px;border:none;background:none;
+    border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:hsl(var(--muted-foreground));transition:background .15s,color .15s;
+  }
+  .combobox-toggle:hover{background:hsl(var(--secondary) / .7);color:hsl(var(--foreground));}
+  .combobox-toggle svg{width:16px;height:16px;transition:transform .15s;}
+  .combobox.open .combobox-toggle svg{transform:rotate(180deg);}
+  .combobox-list{
+    position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:20;
+    background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:12px;
+    box-shadow:0 12px 28px -8px rgba(0,0,0,.18);max-height:220px;overflow-y:auto;
+    padding:6px;list-style:none;margin:0;
+  }
+  .combobox-list.hidden{display:none;}
+  .combobox-option{padding:9px 12px;border-radius:8px;font-size:14px;color:hsl(var(--foreground));cursor:pointer;}
+  .combobox-option:hover,.combobox-option.active{background:hsl(var(--secondary) / .7);}
+  .combobox-empty{padding:9px 12px;font-size:13px;color:hsl(var(--muted-foreground));}
   @media (min-width:640px){ .form-grid-2{grid-template-columns:1fr 1fr;} }
   .var-tip{
     display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;color:hsl(var(--primary));
@@ -500,9 +522,14 @@
 
       <div class="field">
         <label class="field-label" for="fieldCategory" data-i18n="fieldCategoryLabel">Category</label>
-        <input id="fieldCategory" name="category" type="text" list="categoryOptions" class="input-field" placeholder="e.g., Sales" autocomplete="off" data-i18n-placeholder="fieldCategoryPlaceholder">
-        <datalist id="categoryOptions"></datalist>
-        <p class="field-desc" data-i18n="fieldCategoryDesc">Optional — group related templates together.</p>
+        <div class="combobox" id="categoryCombobox">
+          <input id="fieldCategory" name="category" type="text" class="input-field" placeholder="e.g., Sales" autocomplete="off" data-i18n-placeholder="fieldCategoryPlaceholder" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="categoryOptionsList">
+          <button type="button" class="combobox-toggle" id="categoryToggleBtn" aria-label="Show categories" data-i18n-aria-label="categoryToggleAriaLabel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <ul class="combobox-list hidden" id="categoryOptionsList" role="listbox"></ul>
+        </div>
+        <p class="field-desc" data-i18n="fieldCategoryDesc">Optional — pick an existing category or type a new one to create it.</p>
       </div>
 
       <div class="form-grid-2">
@@ -654,8 +681,11 @@
       errContentRequired: "Content is required",
       fieldCategoryLabel: "Category",
       fieldCategoryPlaceholder: "e.g., Sales",
-      fieldCategoryDesc: "Optional — group related templates together.",
+      fieldCategoryDesc: "Optional — pick an existing category or type a new one to create it.",
       categoryUncategorizedLabel: "Uncategorized",
+      categoryToggleAriaLabel: "Show categories",
+      categoryNoneYet: "No categories yet — type a name below to create one.",
+      categoryNoMatch: "No matching category — you can still save this as a new one.",
       fieldInfoLabel: "Info",
       fieldInfoPlaceholder: "e.g., For returning customers",
       fieldInfoDesc: "Optional detail shown with the template.",
@@ -736,8 +766,11 @@
       errContentRequired: "Текст обов'язковий",
       fieldCategoryLabel: "Категорія",
       fieldCategoryPlaceholder: "напр., Продажі",
-      fieldCategoryDesc: "Необов'язково — групуйте пов'язані шаблони разом.",
+      fieldCategoryDesc: "Необов'язково — виберіть наявну категорію або введіть нову, щоб створити її.",
       categoryUncategorizedLabel: "Без категорії",
+      categoryToggleAriaLabel: "Показати категорії",
+      categoryNoneYet: "Категорій ще немає — введіть назву нижче, щоб створити одну.",
+      categoryNoMatch: "Немає відповідної категорії — можна зберегти це як нову.",
       fieldInfoLabel: "Інформація",
       fieldInfoPlaceholder: "напр., Для постійних клієнтів",
       fieldInfoDesc: "Необов'язкова деталь, що відображається з шаблоном.",
@@ -822,8 +855,11 @@
       errContentRequired: "O conteúdo é obrigatório",
       fieldCategoryLabel: "Categoria",
       fieldCategoryPlaceholder: "ex.: Vendas",
-      fieldCategoryDesc: "Opcional — agrupe modelos relacionados.",
+      fieldCategoryDesc: "Opcional — escolha uma categoria existente ou digite uma nova para criá-la.",
       categoryUncategorizedLabel: "Sem categoria",
+      categoryToggleAriaLabel: "Mostrar categorias",
+      categoryNoneYet: "Ainda não há categorias — digite um nome abaixo para criar uma.",
+      categoryNoMatch: "Nenhuma categoria correspondente — você ainda pode salvar isso como uma nova.",
       fieldInfoLabel: "Informação",
       fieldInfoPlaceholder: "ex.: Para clientes recorrentes",
       fieldInfoDesc: "Detalhe opcional exibido com o modelo.",
@@ -1523,22 +1559,108 @@ document.getElementById("fab").addEventListener("click", function(){
     }
   }
 
+  // ================= Category combobox =================
+
+  var categoryCombobox = document.getElementById("categoryCombobox");
+  var categoryInput = document.getElementById("fieldCategory");
+  var categoryToggleBtn = document.getElementById("categoryToggleBtn");
+  var categoryOptionsList = document.getElementById("categoryOptionsList");
+  var allCategoryNames = [];
+  var categoryActiveIndex = -1;
+
   function populateCategoryOptions(){
-    var datalist = document.getElementById("categoryOptions");
-    if(!datalist) return;
     var categories = [];
     getAll().forEach(function(tpl){
       var cat = (tpl.category || "").trim();
       if(cat && categories.indexOf(cat) === -1) categories.push(cat);
     });
     categories.sort(function(a,b){ return a.localeCompare(b); });
-    datalist.innerHTML = "";
-    categories.forEach(function(cat){
-      var opt = document.createElement("option");
-      opt.value = cat;
-      datalist.appendChild(opt);
-    });
+    allCategoryNames = categories;
   }
+
+  function setActiveCategoryOption(index){
+    var options = categoryOptionsList.querySelectorAll(".combobox-option");
+    options.forEach(function(o){ o.classList.remove("active"); });
+    if(index >= 0 && index < options.length){
+      options[index].classList.add("active");
+      options[index].scrollIntoView({ block: "nearest" });
+      categoryActiveIndex = index;
+    }else{
+      categoryActiveIndex = -1;
+    }
+  }
+
+  function renderCategoryList(){
+    var q = categoryInput.value.trim().toLowerCase();
+    var matches = !q ? allCategoryNames : allCategoryNames.filter(function(c){ return c.toLowerCase().indexOf(q) !== -1; });
+    categoryOptionsList.innerHTML = "";
+    categoryActiveIndex = -1;
+    if(matches.length === 0){
+      var empty = document.createElement("li");
+      empty.className = "combobox-empty";
+      empty.textContent = allCategoryNames.length === 0 ? t("categoryNoneYet") : t("categoryNoMatch");
+      categoryOptionsList.appendChild(empty);
+    }else{
+      matches.forEach(function(cat){
+        var li = document.createElement("li");
+        li.className = "combobox-option";
+        li.textContent = cat;
+        li.setAttribute("role", "option");
+        li.addEventListener("mousedown", function(e){
+          e.preventDefault();
+          categoryInput.value = cat;
+          closeCategoryList();
+        });
+        categoryOptionsList.appendChild(li);
+      });
+    }
+  }
+
+  function openCategoryList(){
+    renderCategoryList();
+    categoryOptionsList.classList.remove("hidden");
+    categoryCombobox.classList.add("open");
+    categoryInput.setAttribute("aria-expanded", "true");
+  }
+
+  function closeCategoryList(){
+    categoryOptionsList.classList.add("hidden");
+    categoryCombobox.classList.remove("open");
+    categoryInput.setAttribute("aria-expanded", "false");
+  }
+
+  categoryInput.addEventListener("focus", openCategoryList);
+  categoryInput.addEventListener("input", openCategoryList);
+  categoryInput.addEventListener("keydown", function(e){
+    var options = categoryOptionsList.querySelectorAll(".combobox-option");
+    if(e.key === "ArrowDown"){
+      e.preventDefault();
+      if(categoryOptionsList.classList.contains("hidden")) openCategoryList();
+      setActiveCategoryOption(Math.min(categoryActiveIndex + 1, options.length - 1));
+    }else if(e.key === "ArrowUp"){
+      e.preventDefault();
+      setActiveCategoryOption(Math.max(categoryActiveIndex - 1, 0));
+    }else if(e.key === "Enter"){
+      if(categoryActiveIndex >= 0 && options[categoryActiveIndex]){
+        e.preventDefault();
+        categoryInput.value = options[categoryActiveIndex].textContent;
+        closeCategoryList();
+      }
+    }else if(e.key === "Escape"){
+      closeCategoryList();
+    }
+  });
+  categoryToggleBtn.addEventListener("click", function(){
+    if(categoryOptionsList.classList.contains("hidden")){
+      categoryInput.focus();
+      openCategoryList();
+    }else{
+      closeCategoryList();
+    }
+  });
+  document.addEventListener("click", function(e){
+    if(!categoryCombobox.contains(e.target)) closeCategoryList();
+  });
 
   templateForm.addEventListener("submit", function(e){
     e.preventDefault();
