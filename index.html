@@ -71,9 +71,8 @@
   }
   .topbar-inner{padding:16px;}
   @media (min-width:640px){ .topbar-inner{padding:16px 24px;} }
-  .brand-row{display:flex;flex-direction:column;gap:16px;justify-content:space-between;}
-  @media (min-width:640px){ .brand-row{flex-direction:row;align-items:center;} }
-  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0;}
   .brand img{width:40px;height:40px;border-radius:10px;}
   .brand h1{font-size:24px;color:hsl(var(--foreground));}
   .brand-tagline{font-size:13px;color:hsl(var(--muted-foreground));display:none;}
@@ -116,6 +115,18 @@
   .template-grid{display:grid;grid-template-columns:1fr;gap:24px;}
   @media (min-width:768px){ .template-grid{grid-template-columns:1fr 1fr;} }
   @media (min-width:1024px){ .template-grid{grid-template-columns:1fr 1fr 1fr;} }
+  .template-grid.grouped{display:flex;flex-direction:column;gap:20px;}
+
+  /* ---------- Category groups ---------- */
+  .tpl-group{border:1px solid hsl(var(--border));border-radius:var(--radius);background:hsl(var(--card));overflow:hidden;}
+  .tpl-group-header{display:flex;align-items:center;gap:10px;padding:14px 20px;cursor:pointer;user-select:none;}
+  .tpl-group-header:hover{background:hsl(var(--secondary) / .4);}
+  .tpl-group-name{font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:hsl(var(--foreground));}
+  .tpl-group-count{font-size:12px;color:hsl(var(--muted-foreground));}
+  .tpl-group-chevron{margin-left:auto;color:hsl(var(--muted-foreground));font-size:12px;transition:transform .15s;}
+  .tpl-group.collapsed .tpl-group-chevron{transform:rotate(-90deg);}
+  .tpl-group-body{padding:20px;border-top:1px solid hsl(var(--border) / .6);}
+  .tpl-group.collapsed .tpl-group-body{display:none;}
 
   /* ---------- Template card ---------- */
   .template-card{
@@ -354,8 +365,7 @@
   .install-prompt .btn-primary svg{width:16px;height:16px;}
 
   /* ---------- Language switcher ---------- */
-  .topbar-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  @media (min-width:640px){ .topbar-controls{flex-wrap:nowrap;} }
+  .topbar-controls{display:flex;align-items:center;gap:8px;margin-top:16px;}
   .lang-select{
     flex:0 0 auto;padding:8px 10px;border-radius:12px;background:hsl(var(--secondary) / .5);
     border:2px solid transparent;color:hsl(var(--foreground));font-size:13px;
@@ -391,16 +401,16 @@
             <p class="brand-tagline" data-i18n="brandTagline">Send repeated WhatsApp messages faster.</p>
           </div>
         </div>
-        <div class="topbar-controls">
-          <div class="search-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="searchInput" placeholder="Search templates..." data-i18n-placeholder="searchPlaceholder">
-          </div>
-          <select class="lang-select" id="langSelectHome" data-i18n-aria-label="langSelectorAriaLabel" aria-label="Language">
-            <option value="en">English</option>
-            <option value="uk">Українська</option>
-            <option value="pt-BR">Português (BR)</option>
-          </select>
+        <select class="lang-select" id="langSelectHome" data-i18n-aria-label="langSelectorAriaLabel" aria-label="Language">
+          <option value="en">English</option>
+          <option value="uk">Українська</option>
+          <option value="pt-BR">Português (BR)</option>
+        </select>
+      </div>
+      <div class="topbar-controls">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search templates..." data-i18n-placeholder="searchPlaceholder">
         </div>
       </div>
     </div>
@@ -486,6 +496,13 @@
         <textarea id="fieldContent" name="content" class="input-field" placeholder="Hi {{name}}, just following up on..." style="margin-top:8px;" data-i18n-placeholder="fieldContentPlaceholder"></textarea>
         <p class="field-desc" id="formContentDesc" data-i18n="formContentDescCreate">Variables will become input fields when you use this template.</p>
         <p class="field-error" id="errContent" data-i18n="errContentRequired">Content is required</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="fieldCategory" data-i18n="fieldCategoryLabel">Category</label>
+        <input id="fieldCategory" name="category" type="text" list="categoryOptions" class="input-field" placeholder="e.g., Sales" autocomplete="off" data-i18n-placeholder="fieldCategoryPlaceholder">
+        <datalist id="categoryOptions"></datalist>
+        <p class="field-desc" data-i18n="fieldCategoryDesc">Optional — group related templates together.</p>
       </div>
 
       <div class="form-grid-2">
@@ -635,6 +652,10 @@
       formContentDescCreate: "Variables will become input fields when you use this template.",
       formContentDescEdit: "Variables: Use {{variable_name}} to create placeholders.",
       errContentRequired: "Content is required",
+      fieldCategoryLabel: "Category",
+      fieldCategoryPlaceholder: "e.g., Sales",
+      fieldCategoryDesc: "Optional — group related templates together.",
+      categoryUncategorizedLabel: "Uncategorized",
       fieldInfoLabel: "Info",
       fieldInfoPlaceholder: "e.g., For returning customers",
       fieldInfoDesc: "Optional detail shown with the template.",
@@ -713,6 +734,10 @@
       formContentDescCreate: "Змінні стануть полями введення під час використання цього шаблону.",
       formContentDescEdit: "Змінні: використовуйте {{variable_name}} для створення заповнювачів.",
       errContentRequired: "Текст обов'язковий",
+      fieldCategoryLabel: "Категорія",
+      fieldCategoryPlaceholder: "напр., Продажі",
+      fieldCategoryDesc: "Необов'язково — групуйте пов'язані шаблони разом.",
+      categoryUncategorizedLabel: "Без категорії",
       fieldInfoLabel: "Інформація",
       fieldInfoPlaceholder: "напр., Для постійних клієнтів",
       fieldInfoDesc: "Необов'язкова деталь, що відображається з шаблоном.",
@@ -795,6 +820,10 @@
       formContentDescCreate: "As variáveis se tornarão campos de entrada ao usar este modelo.",
       formContentDescEdit: "Variáveis: use {{variable_name}} para criar espaços reservados.",
       errContentRequired: "O conteúdo é obrigatório",
+      fieldCategoryLabel: "Categoria",
+      fieldCategoryPlaceholder: "ex.: Vendas",
+      fieldCategoryDesc: "Opcional — agrupe modelos relacionados.",
+      categoryUncategorizedLabel: "Sem categoria",
       fieldInfoLabel: "Informação",
       fieldInfoPlaceholder: "ex.: Para clientes recorrentes",
       fieldInfoDesc: "Detalhe opcional exibido com o modelo.",
@@ -959,6 +988,7 @@
       var metadata = [
         "[TEMPLATE]",
         "Title: " + singleLine(template.title),
+        template.category ? "Category: " + singleLine(template.category) : "",
         template.info ? "Info: " + singleLine(template.info) : "",
         template.time ? "Time: " + singleLine(template.time) : "",
         "Content:"
@@ -996,11 +1026,13 @@
       }
       var infoMatch = metadata.match(/(?:^|\r?\n)Info:\s*(.*)/);
       var timeMatch = metadata.match(/(?:^|\r?\n)Time:\s*(.*)/);
+      var categoryMatch = metadata.match(/(?:^|\r?\n)Category:\s*(.*)/);
       return {
         title: title,
         content: content,
         info: infoMatch && infoMatch[1] ? infoMatch[1].trim() : "",
-        time: timeMatch && timeMatch[1] ? timeMatch[1].trim() : ""
+        time: timeMatch && timeMatch[1] ? timeMatch[1].trim() : "",
+        category: categoryMatch && categoryMatch[1] ? categoryMatch[1].trim() : ""
       };
     });
   }
@@ -1010,9 +1042,9 @@
       var stored = localStorage.getItem(STORAGE_KEY);
       if(!stored){
         var defaults = [
-          { id:1, title:"Order Ready", content:"Hi {{name}}, your order #{{orderId}} is ready for pickup!", info:"", time:"", order:0, createdAt:new Date().toISOString() },
-          { id:2, title:"Meeting Reminder", content:"Hello {{name}}, reminder for our meeting at {{time}} today. See you there!", info:"", time:"", order:1, createdAt:new Date().toISOString() },
-          { id:3, title:"Late Running", content:"Hey {{name}}, I'm running about {{minutes}} minutes late. Sorry!", info:"", time:"", order:2, createdAt:new Date().toISOString() }
+          { id:1, title:"Order Ready", content:"Hi {{name}}, your order #{{orderId}} is ready for pickup!", info:"", time:"", category:"", order:0, createdAt:new Date().toISOString() },
+          { id:2, title:"Meeting Reminder", content:"Hello {{name}}, reminder for our meeting at {{time}} today. See you there!", info:"", time:"", category:"", order:1, createdAt:new Date().toISOString() },
+          { id:3, title:"Late Running", content:"Hey {{name}}, I'm running about {{minutes}} minutes late. Sorry!", info:"", time:"", category:"", order:2, createdAt:new Date().toISOString() }
         ];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
         return defaults;
@@ -1023,6 +1055,7 @@
         for(var k in template){ if(Object.prototype.hasOwnProperty.call(template,k)) copy[k]=template[k]; }
         copy.info = typeof template.info === "string" ? template.info : "";
         copy.time = typeof template.time === "string" ? template.time : "";
+        copy.category = typeof template.category === "string" ? template.category : "";
         copy.order = typeof template.order === "number" ? template.order : index;
         return copy;
       });
@@ -1059,6 +1092,7 @@
       content: data.content,
       info: data.info,
       time: data.time,
+      category: data.category || "",
       order: all.length === 0 ? 0 : Math.max.apply(null, all.map(function(t){ return t.order; })) + 1,
       createdAt: new Date().toISOString()
     };
@@ -1105,7 +1139,7 @@
     var nextOrder = all.length === 0 ? 0 : Math.max.apply(null, all.map(function(t){ return t.order; })) + 1;
     var newTemplates = importedTemplates.map(function(t, index){
       return {
-        title: t.title, content: t.content, info: t.info, time: t.time,
+        title: t.title, content: t.content, info: t.info, time: t.time, category: t.category,
         id: getNextId(all) + index,
         order: nextOrder + index,
         createdAt: new Date().toISOString()
@@ -1184,6 +1218,7 @@
 
   var searchQuery = "";
   var draggedId = null;
+  var collapsedCategories = {};
 
   var templateGrid = document.getElementById("templateGrid");
   var homeEmpty = document.getElementById("homeEmpty");
@@ -1194,10 +1229,15 @@
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
   }
 
-  function buildTemplateCard(template, orderedAll){
-    var idx = orderedAll.findIndex(function(t){ return t.id === template.id; });
+  function sameCategory(a, b){
+    return (a.category || "").trim() === (b.category || "").trim();
+  }
+
+  function buildTemplateCard(template, all){
+    var scope = all.filter(function(t){ return sameCategory(t, template); });
+    var idx = scope.findIndex(function(t){ return t.id === template.id; });
     var canMoveUp = idx > 0;
-    var canMoveDown = idx < orderedAll.length - 1;
+    var canMoveDown = idx < scope.length - 1;
     var variables = (template.content.match(/{{(.*?)}}/g) || []).length;
 
     var card = document.createElement("div");
@@ -1208,8 +1248,11 @@
     card.addEventListener("dragover", function(e){ e.preventDefault(); });
     card.addEventListener("drop", function(){
       if(draggedId !== null && draggedId !== template.id){
-        try{ reorderTemplates(draggedId, template.id); renderHome(); }
-        catch(e){ toast(t("toastReorderErrorTitle"), e.message, "destructive"); }
+        var draggedTpl = all.find(function(t){ return t.id === draggedId; });
+        if(draggedTpl && sameCategory(draggedTpl, template)){
+          try{ reorderTemplates(draggedId, template.id); renderHome(); }
+          catch(e){ toast(t("toastReorderErrorTitle"), e.message, "destructive"); }
+        }
       }
       draggedId = null;
     });
@@ -1302,14 +1345,66 @@
 
   function moveTemplate(templateId, direction){
     var all = getAll();
-    var index = all.findIndex(function(t){ return t.id === templateId; });
-    var target = all[index + (direction === "up" ? -1 : 1)];
+    var current = all.find(function(t){ return t.id === templateId; });
+    if(!current) return;
+    var scope = all.filter(function(t){ return sameCategory(t, current); });
+    var index = scope.findIndex(function(t){ return t.id === templateId; });
+    var target = scope[index + (direction === "up" ? -1 : 1)];
     if(target){
       try{
         reorderTemplates(templateId, target.id, direction === "up" ? "before" : "after");
         renderHome();
       }catch(e){ toast(t("toastReorderErrorTitle"), e.message, "destructive"); }
     }
+  }
+
+  function buildCategoryGroup(key, items, all){
+    var collapsed = !!collapsedCategories[key];
+
+    var group = document.createElement("div");
+    group.className = "tpl-group" + (collapsed ? " collapsed" : "");
+
+    var header = document.createElement("div");
+    header.className = "tpl-group-header";
+    var name = document.createElement("span");
+    name.className = "tpl-group-name";
+    name.textContent = key || t("categoryUncategorizedLabel");
+    header.appendChild(name);
+    var count = document.createElement("span");
+    count.className = "tpl-group-count";
+    count.textContent = items.length;
+    header.appendChild(count);
+    var chevron = document.createElement("span");
+    chevron.className = "tpl-group-chevron";
+    chevron.textContent = "▾";
+    header.appendChild(chevron);
+    header.addEventListener("click", function(){
+      collapsedCategories[key] = !collapsedCategories[key];
+      renderHome();
+    });
+    group.appendChild(header);
+
+    var body = document.createElement("div");
+    body.className = "tpl-group-body template-grid";
+    items.forEach(function(tpl){ body.appendChild(buildTemplateCard(tpl, all)); });
+    group.appendChild(body);
+
+    return group;
+  }
+
+  function renderGroupedTemplates(filtered, all){
+    var groups = {};
+    var order = [];
+    filtered.forEach(function(tpl){
+      var key = (tpl.category || "").trim();
+      if(!(key in groups)){ groups[key] = []; order.push(key); }
+      groups[key].push(tpl);
+    });
+    var namedKeys = order.filter(function(k){ return k !== ""; }).sort(function(a,b){ return a.localeCompare(b); });
+    if(Object.prototype.hasOwnProperty.call(groups, "")) namedKeys.push("");
+    namedKeys.forEach(function(key){
+      templateGrid.appendChild(buildCategoryGroup(key, groups[key], all));
+    });
   }
 
   function renderHome(){
@@ -1319,7 +1414,8 @@
       return t.title.toLowerCase().indexOf(q) !== -1 ||
         t.content.toLowerCase().indexOf(q) !== -1 ||
         t.info.toLowerCase().indexOf(q) !== -1 ||
-        t.time.toLowerCase().indexOf(q) !== -1;
+        t.time.toLowerCase().indexOf(q) !== -1 ||
+        (t.category || "").toLowerCase().indexOf(q) !== -1;
     });
 
     templateGrid.innerHTML = "";
@@ -1329,7 +1425,13 @@
     }else{
       templateGrid.classList.remove("hidden");
       homeEmpty.classList.add("hidden");
-      filtered.forEach(function(t){ templateGrid.appendChild(buildTemplateCard(t, all)); });
+      var hasCategories = filtered.some(function(t){ return (t.category || "").trim(); });
+      templateGrid.classList.toggle("grouped", hasCategories);
+      if(hasCategories){
+        renderGroupedTemplates(filtered, all);
+      }else{
+        filtered.forEach(function(t){ templateGrid.appendChild(buildTemplateCard(t, all)); });
+      }
     }
   }
 
@@ -1394,6 +1496,8 @@ document.getElementById("fab").addEventListener("click", function(){
     errTitle.classList.remove("show");
     errContent.classList.remove("show");
 
+    populateCategoryOptions();
+
     if(mode === "create"){
       formNotFound.classList.add("hidden");
       templateForm.classList.remove("hidden");
@@ -1415,7 +1519,25 @@ document.getElementById("fab").addEventListener("click", function(){
       templateForm.elements["content"].value = template.content;
       templateForm.elements["info"].value = template.info;
       templateForm.elements["time"].value = template.time;
+      templateForm.elements["category"].value = template.category || "";
     }
+  }
+
+  function populateCategoryOptions(){
+    var datalist = document.getElementById("categoryOptions");
+    if(!datalist) return;
+    var categories = [];
+    getAll().forEach(function(tpl){
+      var cat = (tpl.category || "").trim();
+      if(cat && categories.indexOf(cat) === -1) categories.push(cat);
+    });
+    categories.sort(function(a,b){ return a.localeCompare(b); });
+    datalist.innerHTML = "";
+    categories.forEach(function(cat){
+      var opt = document.createElement("option");
+      opt.value = cat;
+      datalist.appendChild(opt);
+    });
   }
 
   templateForm.addEventListener("submit", function(e){
@@ -1431,7 +1553,8 @@ document.getElementById("fab").addEventListener("click", function(){
       title: titleVal,
       content: contentVal,
       info: templateForm.elements["info"].value,
-      time: templateForm.elements["time"].value
+      time: templateForm.elements["time"].value,
+      category: templateForm.elements["category"].value.trim()
     };
     try{
       if(formMode === "create"){
