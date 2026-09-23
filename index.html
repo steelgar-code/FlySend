@@ -184,6 +184,13 @@
   .empty-state p{color:hsl(var(--muted-foreground));margin-top:8px;max-width:340px;margin-left:auto;margin-right:auto;margin-bottom:32px;}
   .empty-state code{background:hsl(var(--muted));padding:1px 5px;border-radius:4px;font-size:13px;}
 
+  /* ---------- Crosslinks to sibling apps ---------- */
+  .more-apps{margin:24px 0 72px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 8px;font-size:12px;color:hsl(var(--muted-foreground));}
+  @media (min-width:640px){ .more-apps{margin-bottom:0;} }
+  .more-apps a{color:hsl(var(--primary));font-weight:600;text-decoration:none;}
+  .more-apps a:hover{text-decoration:underline;}
+  .more-apps-sep{opacity:.5;}
+
   /* ---------- IO footer ---------- */
   .io-footer{
     margin-top:40px;padding-top:24px;border-top:1px solid hsl(var(--border) / .5);
@@ -467,6 +474,16 @@
         <input type="file" id="importFileInput" accept=".txt,text/plain" class="hidden" aria-label="Import templates text file" data-i18n-aria-label="importFileAriaLabel">
       </div>
     </div>
+
+    <!-- Crosslinks to sibling apps -->
+    <p class="more-apps">
+      <span data-i18n="moreAppsLabel">More apps:</span>
+      <a href="https://steelgar-code.github.io/FlyLog/" target="_blank" rel="noopener noreferrer">FlyLog</a>
+      <span class="more-apps-sep">&middot;</span>
+      <a href="https://steelgar-code.github.io/FlyStock/" target="_blank" rel="noopener noreferrer">FlyStock</a>
+      <span class="more-apps-sep">&middot;</span>
+      <a href="https://steelgar-code.github.io/FlySky/" target="_blank" rel="noopener noreferrer">FlySky</a>
+    </p>
   </main>
 
   <button type="button" id="fab" class="fab" aria-label="Create template" data-i18n-aria-label="fabAriaLabel">
@@ -699,6 +716,7 @@
       copyLabelCopied: "Copied",
       sendWhatsAppBtn: "Send to WhatsApp",
       notFound404Title: "404 — Page not found",
+      moreAppsLabel: "More apps:",
       installTitle: "Install FlySend WA",
       installDesc: "Add to home screen for quick access",
       installBtnLabel: "Install App",
@@ -784,6 +802,7 @@
       copyLabelCopied: "Скопійовано",
       sendWhatsAppBtn: "Надіслати у WhatsApp",
       notFound404Title: "404 — Сторінку не знайдено",
+      moreAppsLabel: "Інші застосунки:",
       installTitle: "Встановити FlySend WA",
       installDesc: "Додайте на головний екран для швидкого доступу",
       installBtnLabel: "Встановити застосунок",
@@ -873,6 +892,7 @@
       copyLabelCopied: "Copiado",
       sendWhatsAppBtn: "Enviar para o WhatsApp",
       notFound404Title: "404 — Página não encontrada",
+      moreAppsLabel: "Mais apps:",
       installTitle: "Instalar FlySend WA",
       installDesc: "Adicione à tela inicial para acesso rápido",
       installBtnLabel: "Instalar aplicativo",
