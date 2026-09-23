@@ -21,7 +21,10 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          // FlyLog, FlySend, FlyStock and FlySky share the steelgar-code.github.io
+          // origin, and Cache Storage is per origin: only delete FlySend's own
+          // old caches, never the other apps' offline copies.
+          .filter((key) => key.startsWith("flysend-") && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
     )
