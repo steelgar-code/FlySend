@@ -1433,7 +1433,7 @@
 
   remindersPanelHeader.addEventListener("click", function(){
     remindersPanelCollapsed = !remindersPanelCollapsed;
-    remindersPanel.classList.toggle("collapsed", remindersPanelCollapsed);
+    renderRemindersPanel();
   });
 
   function formatReminderTime(date){
