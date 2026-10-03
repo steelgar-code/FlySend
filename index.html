@@ -34,6 +34,8 @@
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 26 83% 14%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 160 84% 39%;
@@ -147,6 +149,36 @@
   .tc-info{font-size:12px;color:hsl(var(--muted-foreground));margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tc-time{font-size:12px;color:hsl(var(--muted-foreground));margin-top:4px;display:flex;align-items:center;gap:4px;}
   .tc-time svg{width:12px;height:12px;flex-shrink:0;}
+  .tc-time-icon{display:flex;flex-shrink:0;}
+  .tc-time-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .tc-reminder-toggle{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:none;background:transparent;color:hsl(var(--muted-foreground) / .6);cursor:pointer;padding:0;margin-left:2px;border-radius:999px;flex-shrink:0;}
+  .tc-reminder-toggle svg{width:13px;height:13px;}
+  .tc-reminder-toggle:hover{background:hsl(var(--secondary) / .6);color:hsl(var(--foreground));}
+  .tc-reminder-toggle.active{color:hsl(var(--primary));}
+  .tc-reminder-toggle.active:hover{background:hsl(var(--primary) / .1);}
+  .time-highlight{font-weight:700;border-radius:4px;padding:0 3px;}
+  .time-highlight-red{background:hsl(var(--destructive) / .15);color:hsl(var(--destructive));}
+  .time-highlight-yellow{background:hsl(var(--warning) / .2);color:hsl(var(--warning-foreground));}
+
+  /* ---------- Reminders panel ---------- */
+  .reminders-panel{border:1px solid hsl(var(--border));border-radius:var(--radius);background:hsl(var(--card));margin-bottom:20px;overflow:hidden;}
+  .reminders-panel-header{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;user-select:none;}
+  .reminders-panel-header:hover{background:hsl(var(--secondary) / .4);}
+  .reminders-panel-header svg{width:16px;height:16px;color:hsl(var(--primary));flex-shrink:0;}
+  .reminders-panel-title{font-weight:700;font-size:13px;}
+  .reminders-panel-count{font-size:12px;font-weight:600;color:hsl(var(--muted-foreground));background:hsl(var(--muted));padding:1px 9px;border-radius:999px;}
+  .reminders-panel-chevron{margin-left:auto;color:hsl(var(--muted-foreground));font-size:12px;transition:transform .15s;}
+  .reminders-panel.collapsed .reminders-panel-chevron{transform:rotate(-90deg);}
+  .reminders-panel-body{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px 14px;border-top:1px solid hsl(var(--border) / .6);}
+  .reminders-panel.collapsed .reminders-panel-body{display:none;}
+  .reminder-row{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:hsl(var(--muted));font-size:12px;transition:transform .15s;}
+  .reminder-row:hover{transform:translateY(-1px);}
+  .reminder-row-time{font-family:var(--font-display);font-weight:700;color:hsl(var(--foreground));}
+  .reminder-row-title{color:hsl(var(--muted-foreground));font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;}
+  .reminder-row-red{background:hsl(var(--destructive) / .12);}
+  .reminder-row-red .reminder-row-time{color:hsl(var(--destructive));}
+  .reminder-row-yellow{background:hsl(var(--warning) / .18);}
+  .reminder-row-yellow .reminder-row-time{color:hsl(var(--warning-foreground));}
   .tc-badge-row{margin-top:6px;}
   .tc-badge{display:inline-block;font-size:12px;font-weight:500;padding:2px 10px;border-radius:999px;}
   .tc-badge.has-vars{background:hsl(var(--primary) / .1);color:hsl(var(--primary));}
@@ -446,6 +478,16 @@
   </header>
 
   <main class="main-content max-w-5">
+    <div id="remindersPanel" class="reminders-panel hidden">
+      <div class="reminders-panel-header" id="remindersPanelHeader">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 3.5 1.5 5.5 2 6.5a1 1 0 0 1-.9 1.5H4.9a1 1 0 0 1-.9-1.5c.5-1 2-3 2-6.5z"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="reminders-panel-title" data-i18n="remindersPanelTitle">Upcoming sends</span>
+        <span class="reminders-panel-count" id="remindersPanelCount"></span>
+        <span class="reminders-panel-chevron">▾</span>
+      </div>
+      <div class="reminders-panel-body" id="remindersPanelBody"></div>
+    </div>
+
     <div id="templateGrid" class="template-grid"></div>
 
     <div id="homeEmpty" class="empty-state hidden">
@@ -726,6 +768,9 @@
       toastReorderErrorTitle: "Could not reorder templates",
       moveUpAriaLabel: "Move {title} up",
       moveDownAriaLabel: "Move {title} down",
+      remindersPanelTitle: "Upcoming sends",
+      reminderToggleOnTitle: "Reminders on — click to disable",
+      reminderToggleOffTitle: "Reminders off — click to enable",
       deleteConfirm: "Delete \"{title}\"? This will permanently delete it. This action cannot be undone.",
       toastTemplateDeletedTitle: "Template deleted",
       toastTemplateDeletedDesc: "The template has been removed.",
@@ -812,6 +857,9 @@
       toastReorderErrorTitle: "Не вдалося змінити порядок шаблонів",
       moveUpAriaLabel: "Перемістити {title} вгору",
       moveDownAriaLabel: "Перемістити {title} вниз",
+      remindersPanelTitle: "Найближчі відправлення",
+      reminderToggleOnTitle: "Нагадування увімкнено — натисніть, щоб вимкнути",
+      reminderToggleOffTitle: "Нагадування вимкнено — натисніть, щоб увімкнути",
       deleteConfirm: "Видалити «{title}»? Це остаточно видалить шаблон. Цю дію неможливо скасувати.",
       toastTemplateDeletedTitle: "Шаблон видалено",
       toastTemplateDeletedDesc: "Шаблон було видалено.",
@@ -902,6 +950,9 @@
       toastReorderErrorTitle: "Não foi possível reordenar os modelos",
       moveUpAriaLabel: "Mover {title} para cima",
       moveDownAriaLabel: "Mover {title} para baixo",
+      remindersPanelTitle: "Próximos envios",
+      reminderToggleOnTitle: "Lembretes ativados — clique para desativar",
+      reminderToggleOffTitle: "Lembretes desativados — clique para ativar",
       deleteConfirm: "Excluir \"{title}\"? Isso excluirá permanentemente o modelo. Esta ação não pode ser desfeita.",
       toastTemplateDeletedTitle: "Modelo excluído",
       toastTemplateDeletedDesc: "O modelo foi removido.",
@@ -1047,6 +1098,7 @@
         template.category ? "Category: " + singleLine(template.category) : "",
         template.info ? "Info: " + singleLine(template.info) : "",
         template.time ? "Time: " + singleLine(template.time) : "",
+        template.timeRemindersEnabled ? "Reminders: on" : "",
         "Content:"
       ].filter(Boolean);
       var content = template.content
@@ -1083,12 +1135,14 @@
       var infoMatch = metadata.match(/(?:^|\r?\n)Info:\s*(.*)/);
       var timeMatch = metadata.match(/(?:^|\r?\n)Time:\s*(.*)/);
       var categoryMatch = metadata.match(/(?:^|\r?\n)Category:\s*(.*)/);
+      var remindersMatch = metadata.match(/(?:^|\r?\n)Reminders:\s*(.*)/);
       return {
         title: title,
         content: content,
         info: infoMatch && infoMatch[1] ? infoMatch[1].trim() : "",
         time: timeMatch && timeMatch[1] ? timeMatch[1].trim() : "",
-        category: categoryMatch && categoryMatch[1] ? categoryMatch[1].trim() : ""
+        category: categoryMatch && categoryMatch[1] ? categoryMatch[1].trim() : "",
+        timeRemindersEnabled: !!(remindersMatch && /^on$/i.test((remindersMatch[1] || "").trim()))
       };
     });
   }
@@ -1112,6 +1166,7 @@
         copy.info = typeof template.info === "string" ? template.info : "";
         copy.time = typeof template.time === "string" ? template.time : "";
         copy.category = typeof template.category === "string" ? template.category : "";
+        copy.timeRemindersEnabled = template.timeRemindersEnabled === true;
         copy.order = typeof template.order === "number" ? template.order : index;
         return copy;
       });
@@ -1149,6 +1204,7 @@
       info: data.info,
       time: data.time,
       category: data.category || "",
+      timeRemindersEnabled: false,
       order: all.length === 0 ? 0 : Math.max.apply(null, all.map(function(t){ return t.order; })) + 1,
       createdAt: new Date().toISOString()
     };
@@ -1196,6 +1252,7 @@
     var newTemplates = importedTemplates.map(function(t, index){
       return {
         title: t.title, content: t.content, info: t.info, time: t.time, category: t.category,
+        timeRemindersEnabled: t.timeRemindersEnabled === true,
         id: getNextId(all) + index,
         order: nextOrder + index,
         createdAt: new Date().toISOString()
@@ -1204,6 +1261,94 @@
     templates = templates.concat(newTemplates);
     saveTemplatesToStorage(templates);
     return newTemplates.length;
+  }
+
+  // ================= Time reminders =================
+
+  var TIME_PATTERN = /\b([01]?\d|2[0-3]):([0-5]\d)\b/g;
+
+  function extractTimesFromText(text){
+    var matches = [];
+    if(!text) return matches;
+    var re = new RegExp(TIME_PATTERN.source, "g");
+    var m;
+    while((m = re.exec(text)) !== null){
+      matches.push({ start: m.index, end: m.index + m[0].length, text: m[0], hours: parseInt(m[1], 10), minutes: parseInt(m[2], 10) });
+    }
+    return matches;
+  }
+
+  function nextOccurrence(hours, minutes, now){
+    var occ = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+    if(occ.getTime() <= now.getTime()){
+      occ.setDate(occ.getDate() + 1);
+    }
+    return occ;
+  }
+
+  function reminderTier(occurrenceDate, now){
+    var diffMin = (occurrenceDate.getTime() - now.getTime()) / 60000;
+    if(diffMin <= 60) return "red";
+    if(diffMin <= 180) return "yellow";
+    return null;
+  }
+
+  function buildHighlightedTimeFragment(text, now){
+    var frag = document.createDocumentFragment();
+    var matches = extractTimesFromText(text);
+    if(matches.length === 0){
+      frag.appendChild(document.createTextNode(text));
+      return frag;
+    }
+    var cursor = 0;
+    matches.forEach(function(match){
+      if(match.start > cursor){
+        frag.appendChild(document.createTextNode(text.slice(cursor, match.start)));
+      }
+      var occ = nextOccurrence(match.hours, match.minutes, now);
+      var tier = reminderTier(occ, now);
+      if(tier){
+        var span = document.createElement("span");
+        span.className = "time-highlight time-highlight-" + tier;
+        span.textContent = match.text;
+        frag.appendChild(span);
+      }else{
+        frag.appendChild(document.createTextNode(match.text));
+      }
+      cursor = match.end;
+    });
+    if(cursor < text.length){
+      frag.appendChild(document.createTextNode(text.slice(cursor)));
+    }
+    return frag;
+  }
+
+  function collectUpcomingReminders(){
+    var now = new Date();
+    var reminders = [];
+    getAll().forEach(function(template){
+      if(!template.timeRemindersEnabled || !template.time) return;
+      extractTimesFromText(template.time).forEach(function(match){
+        var occ = nextOccurrence(match.hours, match.minutes, now);
+        reminders.push({
+          templateId: template.id,
+          templateTitle: template.title,
+          timeText: match.text,
+          occurrence: occ,
+          tier: reminderTier(occ, now)
+        });
+      });
+    });
+    reminders.sort(function(a, b){ return a.occurrence.getTime() - b.occurrence.getTime(); });
+    return reminders;
+  }
+
+  function toggleTimeReminders(id){
+    var idx = templates.findIndex(function(t){ return t.id === id; });
+    if(idx === -1) return;
+    templates[idx] = Object.assign({}, templates[idx], { timeRemindersEnabled: !templates[idx].timeRemindersEnabled });
+    saveTemplatesToStorage(templates);
+    renderHome();
   }
 
   function downloadTextFile(text, filename){
@@ -1275,9 +1420,51 @@
   var searchQuery = "";
   var draggedId = null;
   var collapsedCategories = {};
+  var remindersPanelCollapsed = false;
 
   var templateGrid = document.getElementById("templateGrid");
   var homeEmpty = document.getElementById("homeEmpty");
+  var remindersPanel = document.getElementById("remindersPanel");
+  var remindersPanelHeader = document.getElementById("remindersPanelHeader");
+  var remindersPanelCount = document.getElementById("remindersPanelCount");
+  var remindersPanelBody = document.getElementById("remindersPanelBody");
+
+  remindersPanelHeader.addEventListener("click", function(){
+    remindersPanelCollapsed = !remindersPanelCollapsed;
+    remindersPanel.classList.toggle("collapsed", remindersPanelCollapsed);
+  });
+
+  function formatReminderTime(date){
+    var h = String(date.getHours()).padStart(2, "0");
+    var m = String(date.getMinutes()).padStart(2, "0");
+    return h + ":" + m;
+  }
+
+  function renderRemindersPanel(){
+    var reminders = collectUpcomingReminders();
+    remindersPanelBody.innerHTML = "";
+    if(reminders.length === 0){
+      remindersPanel.classList.add("hidden");
+      return;
+    }
+    remindersPanel.classList.remove("hidden");
+    remindersPanel.classList.toggle("collapsed", remindersPanelCollapsed);
+    remindersPanelCount.textContent = reminders.length;
+    reminders.forEach(function(reminder){
+      var row = document.createElement("a");
+      row.href = "#/send/" + reminder.templateId;
+      row.className = "reminder-row" + (reminder.tier ? " reminder-row-" + reminder.tier : "");
+      var timeSpan = document.createElement("span");
+      timeSpan.className = "reminder-row-time";
+      timeSpan.textContent = formatReminderTime(reminder.occurrence);
+      var titleSpan = document.createElement("span");
+      titleSpan.className = "reminder-row-title";
+      titleSpan.textContent = reminder.templateTitle;
+      row.appendChild(timeSpan);
+      row.appendChild(titleSpan);
+      remindersPanelBody.appendChild(row);
+    });
+  }
 
   function iconMove(dir){
     return dir === "up"
@@ -1287,6 +1474,10 @@
 
   function sameCategory(a, b){
     return (a.category || "").trim() === (b.category || "").trim();
+  }
+
+  function iconBell(){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 3.5 1.5 5.5 2 6.5a1 1 0 0 1-.9 1.5H4.9a1 1 0 0 1-.9-1.5c.5-1 2-3 2-6.5z"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
   }
 
   function buildTemplateCard(template, all){
@@ -1335,8 +1526,35 @@
     if(template.time){
       var timeEl = document.createElement("p");
       timeEl.className = "tc-time";
-      timeEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span></span>';
-      timeEl.querySelector("span").textContent = template.time;
+      var clockIcon = document.createElement("span");
+      clockIcon.className = "tc-time-icon";
+      clockIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+      timeEl.appendChild(clockIcon);
+      var timeTextEl = document.createElement("span");
+      timeTextEl.className = "tc-time-text";
+      var cardTimeMatches = extractTimesFromText(template.time);
+      if(template.timeRemindersEnabled && cardTimeMatches.length > 0){
+        timeTextEl.appendChild(buildHighlightedTimeFragment(template.time, new Date()));
+      }else{
+        timeTextEl.textContent = template.time;
+      }
+      timeEl.appendChild(timeTextEl);
+      if(cardTimeMatches.length > 0){
+        var reminderBtn = document.createElement("button");
+        reminderBtn.type = "button";
+        reminderBtn.className = "tc-reminder-toggle" + (template.timeRemindersEnabled ? " active" : "");
+        reminderBtn.innerHTML = iconBell();
+        reminderBtn.setAttribute("aria-pressed", template.timeRemindersEnabled ? "true" : "false");
+        var reminderTitle = template.timeRemindersEnabled ? t("reminderToggleOnTitle") : t("reminderToggleOffTitle");
+        reminderBtn.title = reminderTitle;
+        reminderBtn.setAttribute("aria-label", reminderTitle);
+        reminderBtn.addEventListener("click", function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          toggleTimeReminders(template.id);
+        });
+        timeEl.appendChild(reminderBtn);
+      }
       titleWrap.appendChild(timeEl);
     }
     var badgeRow = document.createElement("p");
@@ -1464,6 +1682,7 @@
   }
 
   function renderHome(){
+    renderRemindersPanel();
     var all = getAll();
     var q = searchQuery.trim().toLowerCase();
     var filtered = !q ? all : all.filter(function(t){
@@ -1761,7 +1980,12 @@ document.getElementById("fab").addEventListener("click", function(){
         var s2 = document.createElement("span");
         s2.className = "send-meta-time";
         s2.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span></span>';
-        s2.querySelector("span").textContent = template.time;
+        var sendTimeTextEl = s2.querySelector("span");
+        if(template.timeRemindersEnabled && extractTimesFromText(template.time).length > 0){
+          sendTimeTextEl.appendChild(buildHighlightedTimeFragment(template.time, new Date()));
+        }else{
+          sendTimeTextEl.textContent = template.time;
+        }
         sendMeta.appendChild(s2);
       }
     }else{
