@@ -1,5 +1,7 @@
 # FlySend
 
+[Українська](README.uk.md) · [Português (BR)](README.pt-BR.md)
+
 Send repeated WhatsApp messages faster using reusable templates — fill in the blanks and open a pre-filled chat, no copy-pasting required.
 
 ## Features
