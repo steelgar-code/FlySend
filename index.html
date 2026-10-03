@@ -267,6 +267,8 @@
   .field-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
   .field-label{font-size:16px;font-weight:600;color:hsl(var(--foreground));display:block;margin-bottom:8px;}
   .field-desc{font-size:13px;color:hsl(var(--muted-foreground));margin-top:8px;}
+  .field-desc-icon{display:inline-flex;vertical-align:-2px;margin:0 1px;color:hsl(var(--muted-foreground));}
+  .field-desc-icon svg{width:13px;height:13px;}
   .field-error{font-size:13px;color:hsl(var(--destructive));margin-top:8px;display:none;}
   .field-error.show{display:block;}
   .input-field{
@@ -600,7 +602,7 @@
         <div class="field">
           <label class="field-label" for="fieldTime" data-i18n="fieldTimeLabel">Time</label>
           <input id="fieldTime" name="time" type="text" class="input-field" placeholder="e.g., Weekdays at 9:00" autocomplete="off" data-i18n-placeholder="fieldTimePlaceholder">
-          <p class="field-desc" data-i18n="fieldTimeDesc">Optional time information for regular messages.</p>
+          <p class="field-desc" data-i18n-html="fieldTimeDescHtml">Optional time information for regular messages. Add a 24h time (e.g. 14:30) to enable <span class="field-desc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 3.5 1.5 5.5 2 6.5a1 1 0 0 1-.9 1.5H4.9a1 1 0 0 1-.9-1.5c.5-1 2-3 2-6.5z"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span> reminders for it.</p>
         </div>
       </div>
 
@@ -750,7 +752,7 @@
       fieldInfoDesc: "Optional detail shown with the template.",
       fieldTimeLabel: "Time",
       fieldTimePlaceholder: "e.g., Weekdays at 9:00",
-      fieldTimeDesc: "Optional time information for regular messages.",
+      fieldTimeDescHtml: "Optional time information for regular messages. Add a 24h time (e.g. 14:30) to enable <span class=\"field-desc-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 8a6 6 0 0 1 12 0c0 3.5 1.5 5.5 2 6.5a1 1 0 0 1-.9 1.5H4.9a1 1 0 0 1-.9-1.5c.5-1 2-3 2-6.5z\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/></svg></span> reminders for it.",
       formSubmitSave: "Save Template",
       formSubmitUpdate: "Update Template",
       previewLabel: "Preview",
@@ -839,7 +841,7 @@
       fieldInfoDesc: "Необов'язкова деталь, що відображається з шаблоном.",
       fieldTimeLabel: "Час",
       fieldTimePlaceholder: "напр., Будні дні о 9:00",
-      fieldTimeDesc: "Необов'язкова інформація про час для регулярних повідомлень.",
+      fieldTimeDescHtml: "Необов'язкова інформація про час для регулярних повідомлень. Додайте час у форматі 24г (напр. 14:30), щоб увімкнути для нього <span class=\"field-desc-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 8a6 6 0 0 1 12 0c0 3.5 1.5 5.5 2 6.5a1 1 0 0 1-.9 1.5H4.9a1 1 0 0 1-.9-1.5c.5-1 2-3 2-6.5z\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/></svg></span> нагадування.",
       formSubmitSave: "Зберегти шаблон",
       formSubmitUpdate: "Оновити шаблон",
       previewLabel: "Перегляд",
@@ -857,7 +859,7 @@
       toastReorderErrorTitle: "Не вдалося змінити порядок шаблонів",
       moveUpAriaLabel: "Перемістити {title} вгору",
       moveDownAriaLabel: "Перемістити {title} вниз",
-      remindersPanelTitle: "Найближчі відправлення",
+      remindersPanelTitle: "Заплановані повідомлення",
       reminderToggleOnTitle: "Нагадування увімкнено — натисніть, щоб вимкнути",
       reminderToggleOffTitle: "Нагадування вимкнено — натисніть, щоб увімкнути",
       deleteConfirm: "Видалити «{title}»? Це остаточно видалить шаблон. Цю дію неможливо скасувати.",
@@ -932,7 +934,7 @@
       fieldInfoDesc: "Detalhe opcional exibido com o modelo.",
       fieldTimeLabel: "Horário",
       fieldTimePlaceholder: "ex.: Dias úteis às 9h",
-      fieldTimeDesc: "Informação de horário opcional para mensagens regulares.",
+      fieldTimeDescHtml: "Informação de horário opcional para mensagens regulares. Adicione um horário no formato 24h (ex.: 14:30) para ativar <span class=\"field-desc-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 8a6 6 0 0 1 12 0c0 3.5 1.5 5.5 2 6.5a1 1 0 0 1-.9 1.5H4.9a1 1 0 0 1-.9-1.5c.5-1 2-3 2-6.5z\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/></svg></span> lembretes para ele.",
       formSubmitSave: "Salvar modelo",
       formSubmitUpdate: "Atualizar modelo",
       previewLabel: "Pré-visualização",
