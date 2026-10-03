@@ -1,35 +1,109 @@
 # FlySend
 
-[English](README.md) · [Українська](README.uk.md)
+[English](README.md) · [Українська](README.uk.md) · Português (BR)
 
-Envie mensagens repetidas do WhatsApp mais rápido usando modelos reutilizáveis — preencha as lacunas e abra uma conversa já pronta, sem copiar e colar.
+Crie modelos de mensagens para o WhatsApp, reutilize-os e preencha os dados necessários em poucos cliques. O FlySend abrirá uma conversa com o texto já pronto — basta revisar a mensagem e enviá-la.
 
 ## Funcionalidades
 
-- **Modelos reutilizáveis** — salve modelos de mensagem com marcadores `{{variavel}}` e reutilize-os sempre que precisar.
-- **Variáveis inteligentes de data/hora** — nomeie uma variável `date` ou `time` e ganhe um botão de um toque na tela de envio que preenche a data de hoje ou a hora atual para você.
-- **Categorias** — agrupe modelos em categorias com um seletor pesquisável (escolha uma existente ou digite um nome novo para criá-la). A tela inicial agrupa automaticamente os modelos por categoria assim que você usa uma, e cada grupo pode ser recolhido.
-- **Lembretes de horário de envio** — ative lembretes em um modelo (um ícone de sino aparece sempre que o campo Horário contém um horário no formato 24h `HH:MM`) para ser visualmente lembrado dos próximos envios. A tela inicial mostra um painel recolhível listando os horários correspondentes de todos os modelos com lembretes ativados para as próximas 24 horas; horários dentro da próxima hora são destacados em vermelho, entre 1 e 3 horas em amarelo, tanto no painel quanto diretamente no campo Horário onde ele aparecer. Ativar ou desativar o sino é instantâneo — não é preciso abrir ou salvar o modelo para isso. Tocar em um lembrete leva direto à tela de envio daquele modelo.
-- **Reordenar modelos** — arraste e solte, ou use os botões de subir/descer, para organizar os modelos na ordem que você mais usa.
-- **Busca** — filtre modelos por título, conteúdo, informação, horário ou categoria.
-- **Envio direto pelo WhatsApp** — abre o WhatsApp (web ou aplicativo) com sua mensagem já preenchida, pronta para enviar.
-- **Backup e restauração** — exporte todos os modelos para um arquivo de texto simples e importe-os de volta (de forma aditiva — nada que já foi salvo é sobrescrito). Como tudo fica armazenado no navegador, exportar um backup periodicamente é a única forma de manter seus modelos seguros.
-- **PWA instalável** — instale na tela inicial e use offline graças a um service worker.
-- **Multilíngue** — disponível em inglês, ucraniano e português (BR).
-- **Armazenamento somente local** — os modelos ficam armazenados no seu navegador; nada é enviado a um servidor.
+- **Modelos reutilizáveis** — salve mensagens com variáveis, como `{{name}}`, e reutilize-as novamente sem copiar o texto manualmente.
+- **Preenchimento automático de data e hora** — use as variáveis `{{date}}` e `{{time}}` para preencher a data ou a hora atual com um toque.
+- **Categorias** — agrupe modelos por finalidade, recolha os grupos e encontre rapidamente as mensagens que precisa.
+- **Lembretes de envio** — defina um horário para os modelos e veja lembretes das próximas 24 horas. O horário de envio que se aproxima é destacado por cor.
+- **Busca** — encontre modelos por título, texto da mensagem, informação adicional, horário ou categoria.
+- **Ordem personalizada dos modelos** — arraste os modelos ou reordene-os com os botões.
+- **Preparação da mensagem no WhatsApp** — abra o WhatsApp no navegador ou no aplicativo com o texto já preenchido.
+- **Backup** — exporte os modelos para um arquivo e restaure-os por importação sem sobrescrever os dados existentes.
+- **Acesso offline** — instale o FlySend como PWA e use-o sem conexão à internet depois de configurado.
+- **Três idiomas de interface** — inglês, ucraniano e português (Brasil).
 
-## Uso
+## Como usar
 
-O FlySend é um único arquivo HTML estático, sem etapa de build ou dependências. Para executá-lo:
+1. Abra o FlySend no navegador.
+2. Crie um modelo de mensagem e adicione as variáveis necessárias.
+3. Se quiser, defina uma categoria e um horário de lembrete.
+4. Abra o modelo, preencha os campos necessários e prepare a mensagem.
+5. Vá para o WhatsApp e revise o texto antes de enviar.
 
-1. Abra `index.html` diretamente no navegador, ou
-2. Sirva a pasta com qualquer servidor de arquivos estáticos (ex.: `npx serve .`) e abra no navegador.
-3. Opcionalmente, instale-o como PWA pelo prompt de instalação do navegador para uso offline.
+## Como funcionam as variáveis nos modelos
+
+As variáveis permitem reutilizar um mesmo modelo para mensagens diferentes, sem editar todo o texto manualmente. Ao preparar a mensagem, você preenche os valores necessários, e o FlySend os insere nos lugares certos do texto.
+
+### Variáveis personalizadas
+
+Adicione variáveis ao texto do modelo no formato `{{nome}}`. Você escolhe o nome da variável — por exemplo, `{{name}}`, `{{company}}` ou `{{meeting_place}}`.
+
+Exemplo de modelo:
+
+```text
+Olá, {{name}}!
+
+Lembrando que nossa reunião será em {{meeting_date}}.
+Local da reunião: {{meeting_place}}.
+```
+
+Ao preparar a mensagem, preencha os valores das variáveis para obter o texto final. Por exemplo:
+
+```text
+Olá, Helena!
+
+Lembrando que nossa reunião será em 15 de outubro.
+Local da reunião: escritório na Khreshchatyk.
+```
+
+### Preenchimento rápido de data e hora
+
+Para preencher rapidamente a data e a hora, use no modelo as variáveis especiais `{{date}}` e `{{time}}`, e os botões correspondentes aparecerão na tela de envio. Um toque preenche a data ou a hora atual sem digitação manual.
+
+Isso é útil para mensagens com lembretes, confirmações de reunião e outras situações em que você precisa adicionar rapidamente a data ou hora atual.
+
+### Dicas de uso
+
+- **Escolha nomes claros** — por exemplo, `{{client_name}}` ou `{{meeting_place}}`.
+- **Reutilize um mesmo modelo** — altere apenas os valores que variam em cada mensagem.
+- **Use o preenchimento rápido de data e hora** — isso evita a digitação manual quando você precisa dos valores atuais.
+
+## Como funcionam os lembretes
+
+1. Abra o modelo e informe um horário no campo "Horário" no formato 24h `HH:MM`, por exemplo `09:30` ou `17:45`.
+2. Ative os lembretes pelo ícone do sino. A alternância é instantânea — não é preciso abrir ou salvar o modelo para isso.
+3. Na tela inicial, expanda o painel de lembretes para ver o horário de envio de todos os modelos com lembretes ativados nas próximas 24 horas.
+4. Observe as marcações de cor:
+   - **Vermelho** — falta menos de uma hora para o horário de envio.
+   - **Amarelo** — faltam entre 1 e 3 horas para o horário de envio.
+   - **Sem destaque de cor** — faltam mais de 3 horas para o horário de envio.
+5. Toque no lembrete desejado para ir direto à tela de envio do modelo correspondente.
+
+As marcações de cor ajudam a avaliar quão próximo está o horário de envio. Os lembretes aparecem na interface do FlySend e não significam que a mensagem será enviada automaticamente. Para enviá-la, vá ao WhatsApp e confirme o envio você mesmo.
+
+## Execução
+
+O FlySend é um arquivo HTML estático, então executá-lo não exige etapa de build nem instalação de dependências.
+
+### Opção 1: abrir o arquivo
+
+Abra o `index.html` no navegador para uso básico.
+
+### Opção 2: executar um servidor web local
+
+Se você tiver o Node.js instalado, execute na pasta do projeto:
+
+```bash
+npx serve .
+```
+
+Abra o endereço exibido pelo comando no navegador.
+
+Para instalar como PWA e testar o modo offline, use um contexto de navegador compatível — HTTPS ou localhost.
 
 ## Dados e privacidade
 
-Todos os modelos são armazenados localmente no seu navegador via `localStorage`. Nada é transmitido a nenhum servidor, exceto o link do WhatsApp que você escolher abrir. Limpar os dados do navegador removerá seus modelos, então exporte um backup regularmente se depender deles.
+Os modelos são armazenados localmente no navegador usando `localStorage`. O FlySend não os envia a nenhum servidor próprio.
+
+Ao abrir o WhatsApp com uma mensagem preparada, o tratamento posterior dos dados depende do WhatsApp.
+
+**Importante:** limpar os dados do navegador pode excluir os modelos salvos. Exporte um backup regularmente para não perder seus dados.
 
 ## Licença
 
-MIT — veja [LICENSE](LICENSE).
+O FlySend é distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
