@@ -324,6 +324,7 @@
   padding:12px 16px;
   background:hsl(var(--background));
   border-top:1px solid hsl(var(--border) / .5);
+  z-index:20;
 }
 
 @media (min-width:640px){
@@ -378,6 +379,7 @@
   .send-footer{
     position:fixed;left:0;right:0;bottom:0;padding:16px;background:hsl(var(--background));
     border-top:1px solid hsl(var(--border) / .5);box-shadow:0 -4px 20px rgba(0,0,0,.05);
+    z-index:20;
   }
   .send-footer-inner{max-width:42rem;margin:0 auto;display:flex;gap:12px;}
   .send-copy-btn{
@@ -1961,7 +1963,7 @@ document.getElementById("fab").addEventListener("click", function(){
     sendFooter.classList.remove("hidden");
 
     currentSendTemplate = template;
-    sendValues = {};
+    sendValues = Object.create(null);
 
     sendTitle.textContent = template.title;
     sendMeta.innerHTML = "";
@@ -1994,18 +1996,31 @@ document.getElementById("fab").addEventListener("click", function(){
       sendMeta.classList.add("hidden");
     }
 
-    var matches = template.content.match(/{{(.*?)}}/g) || [];
-    var variables = Array.from(new Set(matches.map(function(m){ return m.replace(/{{|}}/g, ""); })));
+    var variables = getTemplateVariables(template.content);
 
     sendVariables.innerHTML = "";
     if(variables.length > 0){
       sendVariables.classList.remove("hidden");
       variables.forEach(function(v, idx){ sendVariables.appendChild(buildVariableInput(v, idx)); });
+      // autofocus only applies on page load, so focus the first field by hand.
+      sendVariables.querySelector("input").focus({ preventScroll: true });
     }else{
       sendVariables.classList.add("hidden");
     }
 
-    updateSendPreview(variables);
+    updateSendPreview();
+  }
+
+  // Splitting on a capturing pattern alternates text and variable names:
+  // even indexes are literal text, odd indexes are the names inside {{ }}.
+  var VARIABLE_SPLIT = /{{(.*?)}}/;
+
+  function getTemplateVariables(content){
+    var names = [];
+    content.split(VARIABLE_SPLIT).forEach(function(part, i){
+      if(i % 2 === 1 && names.indexOf(part) === -1) names.push(part);
+    });
+    return names;
   }
 
   function buildVariableInput(name, index){
@@ -2030,12 +2045,9 @@ document.getElementById("fab").addEventListener("click", function(){
     input.placeholder = t("enterVariablePlaceholder", { name: name });
     input.setAttribute("data-var-name", name);
     input.autocomplete = "off";
-    if(index === 0) input.autofocus = true;
     input.addEventListener("input", function(){
       sendValues[name] = input.value;
-      var matches = currentSendTemplate.content.match(/{{(.*?)}}/g) || [];
-      var variables = Array.from(new Set(matches.map(function(m){ return m.replace(/{{|}}/g, ""); })));
-      updateSendPreview(variables);
+      updateSendPreview();
     });
     inline.appendChild(input);
 
@@ -2059,9 +2071,7 @@ document.getElementById("fab").addEventListener("click", function(){
         }
         input.value = val;
         sendValues[name] = val;
-        var matches2 = currentSendTemplate.content.match(/{{(.*?)}}/g) || [];
-        var variables2 = Array.from(new Set(matches2.map(function(m){ return m.replace(/{{|}}/g, ""); })));
-        updateSendPreview(variables2);
+        updateSendPreview();
       });
       inline.appendChild(btn);
     }
@@ -2084,26 +2094,31 @@ document.getElementById("fab").addEventListener("click", function(){
     });
   }
 
-  function updateSendPreview(variables){
+  // Builds the message and its preview in one pass over the template, so
+  // variable names and typed values are always taken literally: values are
+  // never re-scanned for {{ }}, and only unfilled variables get highlighted.
+  function updateSendPreview(){
     if(!currentSendTemplate) return;
-    var msg = currentSendTemplate.content;
-    variables.forEach(function(v){
-      var regex = new RegExp("{{" + v + "}}", "g");
-      msg = msg.replace(regex, sendValues[v] || ("[" + v + "]"));
-    });
-    currentFinalMessage = msg;
-
+    var msg = "";
     sendPreview.innerHTML = "";
-    msg.split(/(\[.*?\])/g).forEach(function(part){
-      if(part.charAt(0) === "[" && part.charAt(part.length - 1) === "]"){
+    currentSendTemplate.content.split(VARIABLE_SPLIT).forEach(function(part, i){
+      if(i % 2 === 0){
+        if(!part) return;
+        msg += part;
+        sendPreview.appendChild(document.createTextNode(part));
+      }else if(sendValues[part]){
+        msg += sendValues[part];
+        sendPreview.appendChild(document.createTextNode(sendValues[part]));
+      }else{
+        var placeholder = "[" + part + "]";
+        msg += placeholder;
         var span = document.createElement("span");
         span.className = "preview-placeholder";
-        span.textContent = part;
+        span.textContent = placeholder;
         sendPreview.appendChild(span);
-      }else if(part){
-        sendPreview.appendChild(document.createTextNode(part));
       }
     });
+    currentFinalMessage = msg;
   }
 
   var btnCopy = document.getElementById("btnCopy");
